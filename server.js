@@ -1,9 +1,9 @@
 require('dotenv').config();
-const express  = require('express');
-const session  = require('express-session');
-const bcrypt   = require('bcryptjs');
-const path     = require('path');
-const db       = require('./db');
+const express       = require('express');
+const cookieSession = require('cookie-session');
+const bcrypt        = require('bcryptjs');
+const path          = require('path');
+const db            = require('./db');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -12,11 +12,13 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({
+app.use(cookieSession({
+  name:   'philly_session',
   secret: process.env.SESSION_SECRET || 'philly-secret-2024',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { httpOnly: true, maxAge: 1000 * 60 * 60 * 8 }
+  maxAge: 1000 * 60 * 60 * 8,
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
 }));
 
 // ── Auth Middleware ────────────────────────────────────────
