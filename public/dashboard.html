@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard – Philadelphia Movement App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --teal:#1ab5b5; --teal-dark:#0e8f8f; --teal-light:#e8f7f7;
+      --purple:#6b21a8; --red:#dc2626; --green:#16a34a; --blue:#1d4ed8;
+      --amber:#d97706; --pink:#db2777; --pink-light:#fce7f3; --sidebar-width:220px; --topbar-h:64px;
+      --text:#2d3748; --muted:#718096; --border:#e2e8f0; --white:#fff; --bg:#edf2f7;
+    }
+    body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+    /* TOPBAR */
+    .topbar{position:fixed;top:0;left:0;right:0;height:var(--topbar-h);background:var(--white);display:flex;align-items:center;padding:0 24px;box-shadow:0 2px 8px rgba(0,0,0,0.08);z-index:200;gap:16px;}
+    .topbar-logo{display:flex;align-items:center;gap:10px;width:var(--sidebar-width);flex-shrink:0;}
+    .logo-crown{width:44px;height:44px;background:radial-gradient(circle at 40% 35%,#2a1e6e,#0d0830);border-radius:50%;border:2px solid var(--teal);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+    .logo-crown::before{content:'♛';color:gold;}
+    .logo-words{font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--purple);line-height:1.4;}
+    .topbar-title{flex:1;font-size:20px;font-weight:800;text-align:center;}
+    .topbar-user{display:flex;align-items:center;gap:10px;background:var(--teal);color:white;padding:8px 16px 8px 8px;border-radius:50px;cursor:pointer;font-size:14px;font-weight:700;position:relative;}
+    .topbar-avatar{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;}
+    .user-dropdown{display:none;position:absolute;top:calc(100% + 8px);right:0;background:white;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.15);min-width:160px;overflow:hidden;}
+    .topbar-user:hover .user-dropdown{display:block;}
+    .user-dropdown a{display:block;padding:12px 18px;font-size:13px;color:var(--text);text-decoration:none;font-weight:600;transition:background 0.15s;}
+    .user-dropdown a:hover{background:var(--teal-light);color:var(--teal-dark);}
+    .user-dropdown a.logout{color:var(--red);}
+
+    /* SIDEBAR */
+    .sidebar{position:fixed;top:var(--topbar-h);left:0;bottom:0;width:var(--sidebar-width);background:var(--white);border-right:1px solid var(--border);padding:24px 0;z-index:100;overflow-y:auto;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:12px 24px;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;border-left:3px solid transparent;transition:all 0.2s;text-decoration:none;}
+    .nav-item:hover{color:var(--teal-dark);background:var(--teal-light);}
+    .nav-item.active{color:var(--teal-dark);background:var(--teal-light);border-left-color:var(--teal);}
+    .nav-item .icon{font-size:18px;width:24px;text-align:center;}
+
+    /* MAIN */
+    .main{margin-left:var(--sidebar-width);margin-top:var(--topbar-h);padding:28px;min-height:calc(100vh - var(--topbar-h));}
+    .panel{display:none;animation:fadeIn 0.3s ease;}
+    .panel.active{display:block;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+    /* STATS */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+    .stat-mini{background:white;border-radius:14px;padding:18px 20px;box-shadow:0 2px 10px rgba(0,0,0,0.05);border-left:4px solid var(--teal);display:flex;align-items:center;gap:14px;}
+    .stat-mini:nth-child(2){border-left-color:var(--purple);}
+    .stat-mini:nth-child(3){border-left-color:#f59e0b;}
+    .stat-mini:nth-child(4){border-left-color:var(--green);}
+    .stat-mini-icon{font-size:28px;}
+    .stat-mini-val{font-size:22px;font-weight:800;}
+    .stat-mini-lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;}
+
+    /* SEARCH CARD */
+    .search-card{background:white;border-radius:16px;padding:28px;margin-bottom:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+    .search-card h2{font-size:20px;font-weight:800;margin-bottom:20px;}
+    .search-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;}
+    .form-group label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;letter-spacing:0.5px;}
+    .form-group input,.form-group select{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:50px;font-family:'Nunito',sans-serif;font-size:13px;color:var(--text);background:#f7fafc;outline:none;transition:border-color 0.2s;appearance:none;}
+    .form-group input:focus,.form-group select:focus{border-color:var(--teal);background:white;}
+    .search-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px;}
+
+    /* BUTTONS */
+    .btn{padding:10px 24px;border-radius:50px;border:none;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;}
+    .btn-red{background:var(--red);color:white;}
+    .btn-teal{background:var(--teal);color:white;}
+    .btn-amber{background:var(--amber);color:white;}
+    .btn-outline{background:white;color:var(--teal);border:2px solid var(--teal);}
+    .btn:hover{transform:translateY(-1px);filter:brightness(1.08);}
+
+    /* MEMBER CARDS */
+    .results-header{font-size:16px;font-weight:800;border-bottom:2px solid var(--teal);padding-bottom:10px;margin-bottom:16px;}
+    .member-card{background:white;border-radius:16px;padding:20px 24px;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,0.06);transition:transform 0.2s,box-shadow 0.2s;}
+    .member-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.1);}
+    .member-top{display:flex;align-items:center;gap:16px;margin-bottom:16px;}
+    .member-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--purple));display:flex;align-items:center;justify-content:center;color:white;font-size:22px;font-weight:800;flex-shrink:0;overflow:hidden;}
+    .member-avatar img{width:100%;height:100%;object-fit:cover;}
+    .member-name-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+    .member-name{font-size:17px;font-weight:800;}
+    .badge{padding:3px 12px;border-radius:50px;font-size:11px;font-weight:700;}
+    .badge-green{background:#dcfce7;color:var(--green);}
+    .badge-amber{background:#fef3c7;color:var(--amber);}
+    .member-id-row{display:flex;gap:8px;flex-wrap:wrap;}
+    .id-pill{padding:4px 12px;border-radius:50px;border:1.5px solid var(--border);font-size:12px;font-weight:700;}
+    .id-pill.purple{background:var(--purple);color:white;border-color:var(--purple);}
+    .id-pill.amber{background:#fef3c7;color:var(--amber);border-color:#fbbf24;}
+    .member-meta{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:13px;color:var(--muted);border-top:1px solid var(--border);padding-top:14px;}
+    .meta-item{display:flex;align-items:center;gap:8px;}
+    .member-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+    .action-btn{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;border:none;transition:transform 0.15s,box-shadow 0.15s;}
+    .action-btn:hover{transform:scale(1.18);box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+    .ab-blue{background:#dbeafe;} .ab-teal{background:var(--teal-light);} .ab-orange{background:#fff7ed;} .ab-red{background:#fee2e2;} .ab-amber{background:#fef3c7;}
+
+    /* FORM CARD */
+    .form-card{background:white;border-radius:16px;padding:32px;box-shadow:0 2px 12px rgba(0,0,0,0.06);max-width:960px;}
+    .form-card h2{font-size:20px;font-weight:800;margin-bottom:24px;}
+    .form-section-title{font-size:13px;font-weight:800;color:var(--teal-dark);letter-spacing:1px;text-transform:uppercase;margin:24px 0 14px;padding-bottom:6px;border-bottom:2px solid var(--teal-light);}
+    .form-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;}
+    .form-row-2{grid-template-columns:repeat(2,1fr);}
+    .form-actions{display:flex;gap:12px;margin-top:28px;justify-content:flex-end;}
+
+    /* PARENT CARD */
+    .parent-card{background:#f8fafc;border:1.5px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;}
+    .parent-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+    .parent-card-title{font-size:14px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px;}
+    .deceased-toggle{display:flex;align-items:center;gap:10px;background:#fee2e2;border:1.5px solid #fca5a5;border-radius:50px;padding:6px 14px;cursor:pointer;transition:all 0.2s;}
+    .deceased-toggle.alive{background:#dcfce7;border-color:#86efac;}
+    .deceased-toggle input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--red);}
+    .deceased-toggle label{font-size:12px;font-weight:800;color:var(--red);cursor:pointer;user-select:none;}
+    .deceased-toggle.alive label{color:var(--green);}
+    .deceased-fields{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+    .deceased-fields.show{display:block;animation:fadeIn 0.25s ease;}
+
+    /* PHOTO UPLOAD */
+    .photo-upload-area{border:2px dashed var(--teal-light);border-radius:16px;padding:30px;text-align:center;cursor:pointer;transition:all 0.2s;background:#f8fdfd;margin-bottom:20px;}
+    .photo-upload-area:hover{border-color:var(--teal);background:var(--teal-light);}
+    .photo-preview{width:100px;height:100px;border-radius:50%;margin:0 auto 12px;background:linear-gradient(135deg,var(--teal),var(--purple));display:flex;align-items:center;justify-content:center;font-size:36px;color:white;overflow:hidden;}
+    .photo-preview img{width:100%;height:100%;object-fit:cover;}
+    .photo-upload-area p{font-size:13px;color:var(--muted);font-weight:600;}
+
+    /* DOC UPLOAD */
+    .doc-upload-area{border:2px dashed #cbd5e0;border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:all 0.2s;background:#f7fafc;}
+    .doc-upload-area:hover{border-color:var(--teal);background:var(--teal-light);}
+    .doc-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#f0f9f9;border-radius:8px;margin-top:8px;font-size:13px;font-weight:600;gap:10px;}
+    .doc-item-name{display:flex;align-items:center;gap:8px;flex:1;overflow:hidden;}
+    .doc-item-name span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .doc-size{color:var(--muted);font-size:11px;white-space:nowrap;}
+    .doc-remove{cursor:pointer;color:var(--red);background:none;border:none;font-size:16px;flex-shrink:0;}
+
+    /* ═══════════ MODAL ═══════════ */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:500;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+    .modal-overlay.open{display:flex;}
+    .modal{background:white;border-radius:20px;width:100%;max-width:740px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,0.25);animation:modalIn 0.35s ease;}
+    @keyframes modalIn{from{opacity:0;transform:scale(0.93) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+    .modal-header{background:linear-gradient(135deg,var(--teal-dark),#0d5e8a);padding:28px 28px 20px;border-radius:20px 20px 0 0;position:relative;}
+    .modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.2);border:none;color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+    .modal-close:hover{background:rgba(255,255,255,0.35);}
+    .modal-member-top{display:flex;align-items:center;gap:20px;}
+    .modal-avatar{width:80px;height:80px;border-radius:50%;border:3px solid rgba(255,255,255,0.6);background:linear-gradient(135deg,rgba(255,255,255,0.2),rgba(255,255,255,0.05));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:white;overflow:hidden;flex-shrink:0;}
+    .modal-avatar img{width:100%;height:100%;object-fit:cover;}
+    .modal-member-name{font-size:22px;font-weight:800;color:white;margin-bottom:6px;}
+    .modal-badges{display:flex;gap:8px;flex-wrap:wrap;}
+    .modal-badge{padding:4px 12px;border-radius:50px;font-size:12px;font-weight:700;}
+    .mb-green{background:#dcfce7;color:var(--green);}
+    .mb-purple{background:rgba(107,33,168,0.8);color:white;}
+    .mb-id{background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.4);}
+    .mb-amber{background:#fef3c7;color:var(--amber);}
+    .modal-tabs{display:flex;border-bottom:2px solid var(--border);padding:0 28px;}
+    .modal-tab{padding:14px 18px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all 0.2s;}
+    .modal-tab:hover{color:var(--teal-dark);}
+    .modal-tab.active{color:var(--teal-dark);border-bottom-color:var(--teal);}
+    .modal-body{padding:24px 28px;}
+    .modal-tab-content{display:none;}
+    .modal-tab-content.active{display:block;animation:fadeIn 0.2s ease;}
+    .detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+    .detail-item{background:#f8fafc;border-radius:10px;padding:14px 16px;}
+    .detail-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;}
+    .detail-value{font-size:14px;font-weight:700;color:var(--text);}
+
+    /* PARENT INFO IN MODAL */
+    .parent-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px;}
+    .parent-info-card{background:#f8fafc;border-radius:14px;padding:18px;border:1.5px solid var(--border);}
+    .parent-info-card.deceased{background:#fff5f5;border-color:#fca5a5;}
+    .parent-info-title{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+    .parent-info-name{font-size:16px;font-weight:800;color:var(--text);margin-bottom:8px;}
+    .parent-info-row{font-size:13px;color:var(--muted);margin-bottom:4px;}
+    .deceased-badge{display:inline-flex;align-items:center;gap:4px;background:#fee2e2;color:var(--red);padding:3px 10px;border-radius:50px;font-size:11px;font-weight:700;margin-top:6px;}
+    .alive-badge{display:inline-flex;align-items:center;gap:4px;background:#dcfce7;color:var(--green);padding:3px 10px;border-radius:50px;font-size:11px;font-weight:700;margin-top:6px;}
+
+    /* BENEFIT MODAL */
+    .benefit-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:600;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+    .benefit-modal-overlay.open{display:flex;}
+    .benefit-modal{background:white;border-radius:20px;width:100%;max-width:480px;box-shadow:0 24px 60px rgba(0,0,0,0.3);animation:modalIn 0.35s ease;overflow:hidden;}
+    .benefit-header{background:linear-gradient(135deg,#b45309,#d97706);padding:24px 28px;color:white;position:relative;}
+    .benefit-header h3{font-size:18px;font-weight:800;margin-bottom:4px;}
+    .benefit-header p{font-size:13px;opacity:0.85;}
+    .benefit-close{position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.2);border:none;color:white;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+    .benefit-body{padding:24px 28px;}
+    .benefit-member-row{display:flex;align-items:center;gap:12px;background:#fef3c7;border-radius:12px;padding:14px 16px;margin-bottom:20px;}
+    .benefit-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--purple));display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:14px;flex-shrink:0;overflow:hidden;}
+    .benefit-avatar img{width:100%;height:100%;object-fit:cover;}
+    .benefit-member-name{font-size:15px;font-weight:800;}
+    .benefit-member-sub{font-size:12px;color:var(--muted);}
+    .benefit-parent-info{background:#fff5f5;border:1.5px solid #fca5a5;border-radius:12px;padding:14px 16px;margin-bottom:20px;font-size:13px;}
+    .benefit-parent-info strong{color:var(--red);}
+    .benefit-form .form-group{margin-bottom:16px;}
+    .benefit-form label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;letter-spacing:0.5px;}
+    .benefit-form input,.benefit-form select,.benefit-form textarea{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Nunito',sans-serif;font-size:14px;color:var(--text);background:#f7fafc;outline:none;transition:border-color 0.2s;}
+    .benefit-form input:focus,.benefit-form select:focus,.benefit-form textarea:focus{border-color:var(--amber);background:white;}
+    .benefit-form textarea{resize:vertical;min-height:80px;border-radius:10px;}
+    .benefit-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+    .benefit-history{margin-top:16px;}
+    .benefit-history-title{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+    .benefit-record{display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px;}
+    .benefit-record-left{display:flex;flex-direction:column;gap:2px;}
+    .benefit-record-amount{font-weight:800;color:var(--green);}
+    .benefit-record-date{font-size:11px;color:var(--muted);}
+    .benefit-record-parent{font-size:11px;background:#fee2e2;color:var(--red);padding:2px 8px;border-radius:50px;font-weight:700;}
+
+    /* DOC VIEWER */
+    .doc-viewer-list{display:flex;flex-direction:column;gap:12px;margin-top:4px;}
+    .doc-viewer-item{display:flex;align-items:center;gap:14px;background:#f8fafc;border-radius:12px;padding:14px 18px;border:1.5px solid var(--border);transition:border-color 0.2s,background 0.2s;}
+    .doc-viewer-item:hover{border-color:var(--teal);background:var(--teal-light);}
+    .doc-icon{font-size:28px;flex-shrink:0;}
+    .doc-info{flex:1;overflow:hidden;}
+    .doc-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .doc-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+    .doc-preview-img{width:100%;max-height:280px;object-fit:contain;border-radius:10px;margin-top:10px;border:1px solid var(--border);}
+    .doc-open-btn{padding:8px 16px;background:var(--teal);color:white;border:none;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:filter 0.2s;text-decoration:none;display:inline-block;}
+    .doc-open-btn:hover{filter:brightness(1.1);}
+    .no-docs{text-align:center;padding:40px 20px;color:var(--muted);}
+    .no-docs .no-docs-icon{font-size:48px;margin-bottom:12px;}
+
+    /* WEDDING BENEFIT MODAL */
+    .wedding-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:600;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+    .wedding-modal-overlay.open{display:flex;}
+    .wedding-modal{background:white;border-radius:20px;width:100%;max-width:500px;box-shadow:0 24px 60px rgba(0,0,0,0.3);animation:modalIn 0.35s ease;overflow:hidden;}
+    .wedding-header{background:linear-gradient(135deg,#be185d,#db2777);padding:24px 28px;color:white;position:relative;}
+    .wedding-header h3{font-size:18px;font-weight:800;margin-bottom:4px;}
+    .wedding-header p{font-size:13px;opacity:0.85;}
+    .wedding-close{position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.2);border:none;color:white;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+    .wedding-body{padding:24px 28px;}
+    .wedding-member-row{display:flex;align-items:center;gap:12px;background:var(--pink-light);border-radius:12px;padding:14px 16px;margin-bottom:20px;}
+    .wedding-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#db2777,var(--purple));display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:14px;flex-shrink:0;overflow:hidden;}
+    .wedding-avatar img{width:100%;height:100%;object-fit:cover;}
+    .wedding-member-name{font-size:15px;font-weight:800;}
+    .wedding-member-sub{font-size:12px;color:var(--muted);}
+    .wedding-form .form-group{margin-bottom:16px;}
+    .wedding-form label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;letter-spacing:0.5px;}
+    .wedding-form input,.wedding-form select,.wedding-form textarea{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Nunito',sans-serif;font-size:14px;color:var(--text);background:#f7fafc;outline:none;transition:border-color 0.2s;}
+    .wedding-form input:focus,.wedding-form select:focus,.wedding-form textarea:focus{border-color:#db2777;background:white;}
+    .wedding-form textarea{resize:vertical;min-height:70px;border-radius:10px;}
+    .wedding-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+    .btn-pink{background:#db2777;color:white;}
+    .ab-pink{background:var(--pink-light);}
+    .wedding-record{display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px;}
+    .wedding-record-amount{font-weight:800;color:#db2777;}
+    .wedding-record-date{font-size:11px;color:var(--muted);}
+    .wedding-record-badge{font-size:11px;background:var(--pink-light);color:#db2777;padding:2px 8px;border-radius:50px;font-weight:700;}
+    .id-pill.pink{background:var(--pink-light);color:#db2777;border-color:#f9a8d4;}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:30px;right:30px;background:var(--green);color:white;padding:14px 24px;border-radius:12px;font-size:14px;font-weight:700;box-shadow:0 6px 24px rgba(0,0,0,0.15);transform:translateY(80px);opacity:0;transition:all 0.4s ease;z-index:999;}
+    .toast.show{transform:translateY(0);opacity:1;}
+
+    @media(max-width:900px){.search-grid,.form-row{grid-template-columns:1fr 1fr;}.stats-row,.parent-info-grid{grid-template-columns:1fr 1fr;}.detail-grid{grid-template-columns:1fr;}}
+    @media(max-width:600px){.sidebar{display:none;}.main{margin-left:0;padding:16px;}.search-grid,.form-row{grid-template-columns:1fr;}.stats-row{grid-template-columns:1fr 1fr;}.parent-info-grid{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-logo">
+    <div class="logo-crown"></div>
+    <div class="logo-words">PHILADELPHIA<br>MOVEMENT APP</div>
+  </div>
+  <div class="topbar-title">Dashboard</div>
+  <div class="topbar-user">
+    <div class="topbar-avatar" id="topAvatar">--</div>
+    <span id="topName">Loading...</span> ▾
+    <div class="user-dropdown">
+      <a href="#" onclick="showPanel('profile');return false;">👤 My Profile</a>
+      <a href="#" class="logout" onclick="handleLogout();return false;">🚪 Logout</a>
+    </div>
+  </div>
+</header>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <a class="nav-item active" onclick="showPanel('search');return false;" href="#"><span class="icon">🏠</span> Dashboard</a>
+  <a class="nav-item" onclick="showPanel('new-member');return false;" href="#"><span class="icon">➕</span> New Member</a>
+  <a class="nav-item" onclick="showPanel('search');return false;" href="#"><span class="icon">👥</span> All Members</a>
+  <a class="nav-item" onclick="showPanel('benefits');return false;" href="#"><span class="icon">💰</span> Death Benefits</a>
+  <a class="nav-item" onclick="showPanel('wedding-benefits');return false;" href="#"><span class="icon">💍</span> Wedding Benefits</a>
+  <a class="nav-item" onclick="showPanel('profile');return false;" href="#"><span class="icon">✏️</span> Update My Profile</a>
+</aside>
+
+<main class="main">
+
+  <!-- ══ SEARCH PANEL ══ -->
+  <div id="panel-search" class="panel active">
+    <div class="stats-row">
+      <div class="stat-mini"><div class="stat-mini-icon">👥</div><div><div class="stat-mini-val" id="totalCount">0</div><div class="stat-mini-lbl">Total Members</div></div></div>
+      <div class="stat-mini"><div class="stat-mini-icon">✅</div><div><div class="stat-mini-val" id="activeCount">0</div><div class="stat-mini-lbl">Active</div></div></div>
+      <div class="stat-mini"><div class="stat-mini-icon">🕊️</div><div><div class="stat-mini-val" id="deceasedCount">0</div><div class="stat-mini-lbl">With Deceased Parent</div></div></div>
+      <div class="stat-mini"><div class="stat-mini-icon">💰</div><div><div class="stat-mini-val" id="benefitCount">0</div><div class="stat-mini-lbl">Death Benefits Paid</div></div></div>
+      <div class="stat-mini" style="border-left-color:#db2777;"><div class="stat-mini-icon">💍</div><div><div class="stat-mini-val" id="weddingCount">0</div><div class="stat-mini-lbl">Wedding Benefits Paid</div></div></div>
+    </div>
+    <div class="search-card">
+      <h2>Search Member</h2>
+      <div class="search-grid">
+        <div class="form-group"><label>Search By ID / Tel / Name / Occupation</label><input type="text" id="searchQuery" placeholder="Type to search..." oninput="filterMembers()"/></div>
+        <div class="form-group"><label>Branch Name</label><select id="filterBranch" onchange="filterMembers()"><option value="all">all</option><option>Pokuase Katapor Branch</option><option>Accra Central Branch</option><option>Kumasi Branch</option></select></div>
+        <div class="form-group"><label>Group</label><select id="filterGroup" onchange="filterMembers()"><option value="all">all</option><option>SECOND CHANCE</option><option>FIRST TIMER</option><option>REGULAR</option></select></div>
+        <div class="form-group"><label>Verification Status</label><select id="filterVerified" onchange="filterMembers()"><option value="all">all</option><option value="verified">Verified</option><option value="pending">Pending</option></select></div>
+        <div class="form-group"><label>Parent Status</label><select id="filterParent" onchange="filterMembers()"><option value="all">all</option><option value="deceased">Has Deceased Parent</option><option value="alive">Both Parents Alive</option></select></div>
+        <div class="form-group"><label>Sort</label><select id="sortOrder" onchange="filterMembers()"><option value="az">a-z</option><option value="za">z-a</option></select></div>
+      </div>
+      <div class="search-actions">
+        <button class="btn btn-red" onclick="clearFilters()">Clear Filters</button>
+        <button class="btn btn-teal" onclick="filterMembers()">🔍 Search</button>
+      </div>
+    </div>
+    <div class="results-header" id="resultsHeader">0 Members Found</div>
+    <div id="memberResults"></div>
+  </div>
+
+  <!-- ══ NEW MEMBER PANEL ══ -->
+  <div id="panel-new-member" class="panel">
+    <div class="form-card">
+      <h2 id="formTitle">➕ Add New Member</h2>
+
+      <!-- Photo -->
+      <div class="photo-upload-area" onclick="document.getElementById('photoInput').click()">
+        <div class="photo-preview" id="photoPreview">📷</div>
+        <p>Click to upload member photo</p>
+        <p style="font-size:11px;margin-top:4px;">JPG, PNG up to 5MB</p>
+        <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="previewPhoto(event)"/>
+      </div>
+
+      <!-- Personal Info -->
+      <div class="form-section-title">👤 Personal Information</div>
+      <div class="form-row">
+        <div class="form-group"><label>Full Name *</label><input type="text" id="fullName" placeholder="e.g. Hakeem Akowra"/></div>
+        <div class="form-group"><label>Contact Number *</label><input type="tel" id="phone" placeholder="e.g. 233275522776"/></div>
+        <div class="form-group"><label>Staff ID Code</label><input type="text" id="capturedBy" placeholder="e.g. STF-0042"/></div>
+        <div class="form-group"><label>Marital Status</label><select id="group"><option>Single</option><option>Married</option><option>Divorced</option><option>Widowed</option></select></div>
+      </div>
+
+      <!-- Branch & Registration -->
+      <div class="form-section-title">🏢 Branch & Registration</div>
+      <div class="form-row">
+        <div class="form-group"><label>Branch Station *</label><select id="branch"><option>Pokuase Katapor Branch</option><option>Accra Central Branch</option><option>Kumasi Branch</option></select></div>
+        <div class="form-group"><label>Department</label><input type="text" id="occupation" placeholder="e.g. Finance"/></div>
+        <div class="form-group"><label>Registration Date</label><input type="date" id="dateCaptured"/></div>
+      </div>
+
+      <!-- hidden fields kept for API compatibility -->
+      <input type="hidden" id="firstName" value=""/>
+      <input type="hidden" id="lastName" value=""/>
+      <input type="hidden" id="dob" value=""/>
+      <input type="hidden" id="gender" value="Male"/>
+      <input type="hidden" id="status" value="active"/>
+      <input type="hidden" id="benefit" value="No"/>
+
+      <!-- FATHER -->
+      <div class="form-section-title">👨 Father's Information</div>
+      <div class="parent-card">
+        <div class="parent-card-header">
+          <div class="parent-card-title">👨 Father</div>
+          <div class="deceased-toggle alive" id="fatherToggle" onclick="toggleDeceased('father')">
+            <input type="checkbox" id="fatherDeceased" onchange="toggleDeceased('father')"/>
+            <label id="fatherToggleLabel" for="fatherDeceased">✅ Alive</label>
+          </div>
+        </div>
+        <div class="form-row form-row-2">
+          <div class="form-group"><label>Father's Full Name</label><input type="text" id="fatherName" placeholder="e.g. Kwame Akowra"/></div>
+          <div class="form-group"><label>Father's Phone</label><input type="tel" id="fatherPhone" placeholder="e.g. 233244000001"/></div>
+        </div>
+        <div class="deceased-fields" id="fatherDeceasedFields">
+          <div style="background:#fee2e2;border-radius:10px;padding:12px 16px;margin-bottom:12px;font-size:13px;color:var(--red);font-weight:700;">
+            🕊️ Father is marked as deceased. The member may be eligible for a Death Benefit payment.
+          </div>
+          <div class="form-row form-row-2">
+            <div class="form-group"><label>Date of Death</label><input type="date" id="fatherDeathDate"/></div>
+            <div class="form-group"><label>Cause of Death</label><input type="text" id="fatherCause" placeholder="e.g. Natural causes"/></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MOTHER -->
+      <div class="form-section-title">👩 Mother's Information</div>
+      <div class="parent-card">
+        <div class="parent-card-header">
+          <div class="parent-card-title">👩 Mother</div>
+          <div class="deceased-toggle alive" id="motherToggle" onclick="toggleDeceased('mother')">
+            <input type="checkbox" id="motherDeceased" onchange="toggleDeceased('mother')"/>
+            <label id="motherToggleLabel" for="motherDeceased">✅ Alive</label>
+          </div>
+        </div>
+        <div class="form-row form-row-2">
+          <div class="form-group"><label>Mother's Full Name</label><input type="text" id="motherName" placeholder="e.g. Akua Mensah"/></div>
+          <div class="form-group"><label>Mother's Phone</label><input type="tel" id="motherPhone" placeholder="e.g. 233244000002"/></div>
+        </div>
+        <div class="deceased-fields" id="motherDeceasedFields">
+          <div style="background:#fee2e2;border-radius:10px;padding:12px 16px;margin-bottom:12px;font-size:13px;color:var(--red);font-weight:700;">
+            🕊️ Mother is marked as deceased. The member may be eligible for a Death Benefit payment.
+          </div>
+          <div class="form-row form-row-2">
+            <div class="form-group"><label>Date of Death</label><input type="date" id="motherDeathDate"/></div>
+            <div class="form-group"><label>Cause of Death</label><input type="text" id="motherCause" placeholder="e.g. Natural causes"/></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documents -->
+      <div class="form-section-title">📎 Document Upload</div>
+      <div class="doc-upload-area" onclick="document.getElementById('docInput').click()">
+        <div style="font-size:36px;margin-bottom:8px;">📁</div>
+        <p style="font-size:14px;font-weight:700;color:var(--muted)">Click to upload documents</p>
+        <p style="font-size:11px;color:#aaa;margin-top:6px;">PDF, JPG, PNG, DOCX • Multiple files allowed</p>
+        <input type="file" id="docInput" multiple accept=".pdf,.jpg,.jpeg,.png,.docx" style="display:none" onchange="addDocuments(event)"/>
+      </div>
+      <div id="docList"></div>
+
+      <div class="form-actions">
+        <button class="btn btn-outline" onclick="cancelForm()">Cancel</button>
+        <button class="btn btn-teal" onclick="saveMember()">💾 Save Member</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DEATH BENEFITS PANEL ══ -->
+  <div id="panel-benefits" class="panel">
+    <div class="search-card" style="margin-bottom:20px;">
+      <h2>💰 Death Benefit Records</h2>
+      <p style="color:var(--muted);font-size:13px;margin-top:-10px;">All payments made to members due to deceased parents.</p>
+    </div>
+    <div id="benefitRecordsPanel"></div>
+  </div>
+
+  <!-- ══ WEDDING BENEFITS PANEL ══ -->
+  <div id="panel-wedding-benefits" class="panel">
+    <div class="search-card" style="margin-bottom:20px;border-top:4px solid #db2777;">
+      <h2>💍 Wedding Benefit Records</h2>
+      <p style="color:var(--muted);font-size:13px;margin-top:-10px;">All payments made to members upon their wedding.</p>
+    </div>
+    <div id="weddingRecordsPanel"></div>
+  </div>
+
+  <!-- ══ PROFILE PANEL ══ -->
+  <div id="panel-profile" class="panel">
+    <div class="form-card">
+      <h2>✏️ Update My Profile</h2>
+      <div class="form-section-title">Account Information</div>
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>Full Name</label><input type="text" id="profileName" placeholder="Your full name"/></div>
+        <div class="form-group"><label>Email</label><input type="email" id="profileEmail" placeholder="your@email.com"/></div>
+        <div class="form-group"><label>New Password</label><input type="password" id="profilePassword" placeholder="Leave blank to keep current"/></div>
+        <div class="form-group"><label>Confirm Password</label><input type="password" id="profilePasswordConfirm" placeholder="Repeat new password"/></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-teal" onclick="saveProfile()">💾 Save Changes</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ═══════════ MEMBER DETAIL MODAL ═══════════ -->
+<div class="modal-overlay" id="memberModal" onclick="closeModalOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-member-top">
+        <div class="modal-avatar" id="modalAvatar">--</div>
+        <div>
+          <div class="modal-member-name" id="modalName">--</div>
+          <div class="modal-badges">
+            <span class="modal-badge mb-id" id="modalId">--</span>
+            <span class="modal-badge mb-green" id="modalStatus">--</span>
+            <span class="modal-badge mb-purple" id="modalGroup">--</span>
+            <span class="modal-badge mb-amber" id="modalDeceasedBadge" style="display:none">🕊️ Deceased Parent</span>
+            <span class="modal-badge" id="modalWeddingBadge" style="display:none;background:var(--pink-light);color:#db2777;">💍 Wedding Benefit</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-tabs">
+      <div class="modal-tab active" onclick="switchTab('details',this)">👤 Details</div>
+      <div class="modal-tab" onclick="switchTab('parents',this)">👨👩 Parents</div>
+      <div class="modal-tab" onclick="switchTab('documents',this)">📎 Documents</div>
+      <div class="modal-tab" onclick="switchTab('benefit-history',this)">💰 Death Benefits</div>
+      <div class="modal-tab" onclick="switchTab('wedding-history',this)">💍 Wedding</div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tab-content active" id="tab-details">
+        <div class="detail-grid" id="modalDetailGrid"></div>
+      </div>
+      <div class="modal-tab-content" id="tab-parents">
+        <div class="parent-info-grid" id="modalParentGrid"></div>
+      </div>
+      <div class="modal-tab-content" id="tab-documents">
+        <div class="doc-viewer-list" id="modalDocList"></div>
+      </div>
+      <div class="modal-tab-content" id="tab-benefit-history">
+        <div id="modalBenefitHistory"></div>
+      </div>
+      <div class="modal-tab-content" id="tab-wedding-history">
+        <div id="modalWeddingHistory"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ DEATH BENEFIT PAYMENT MODAL ═══════════ -->
+<div class="benefit-modal-overlay" id="benefitModal" onclick="closeBenefitOnOverlay(event)">
+  <div class="benefit-modal">
+    <div class="benefit-header">
+      <button class="benefit-close" onclick="closeBenefitModal()">✕</button>
+      <h3>💰 Issue Death Benefit</h3>
+      <p>Record a death benefit payment for this member</p>
+    </div>
+    <div class="benefit-body">
+      <div class="benefit-member-row">
+        <div class="benefit-avatar" id="benefitAvatar">--</div>
+        <div>
+          <div class="benefit-member-name" id="benefitMemberName">--</div>
+          <div class="benefit-member-sub" id="benefitMemberSub">--</div>
+        </div>
+      </div>
+      <div class="benefit-parent-info" id="benefitParentInfo"></div>
+      <div class="benefit-form">
+        <div class="form-group">
+          <label>Deceased Parent</label>
+          <select id="benefitParentSelect"></select>
+        </div>
+        <div class="form-group">
+          <label>Amount (GHS) *</label>
+          <input type="number" id="benefitAmount" placeholder="e.g. 500" min="1"/>
+        </div>
+        <div class="form-group">
+          <label>Payment Method</label>
+          <select id="benefitMethod">
+            <option>Cash</option>
+            <option>Mobile Money</option>
+            <option>Bank Transfer</option>
+            <option>Cheque</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Payment Date</label>
+          <input type="date" id="benefitDate"/>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea id="benefitNotes" placeholder="Any additional notes..."></textarea>
+        </div>
+      </div>
+      <div class="benefit-actions">
+        <button class="btn btn-outline" onclick="closeBenefitModal()">Cancel</button>
+        <button class="btn btn-amber" onclick="issueBenefit()">💰 Issue Payment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ WEDDING BENEFIT MODAL ═══════════ -->
+<div class="wedding-modal-overlay" id="weddingModal" onclick="closeWeddingOnOverlay(event)">
+  <div class="wedding-modal">
+    <div class="wedding-header">
+      <button class="wedding-close" onclick="closeWeddingModal()">✕</button>
+      <h3>💍 Issue Wedding Benefit</h3>
+      <p>Record a wedding benefit payment for this member</p>
+    </div>
+    <div class="wedding-body">
+      <div class="wedding-member-row">
+        <div class="wedding-avatar" id="weddingAvatar">--</div>
+        <div>
+          <div class="wedding-member-name" id="weddingMemberName">--</div>
+          <div class="wedding-member-sub" id="weddingMemberSub">--</div>
+        </div>
+      </div>
+      <div class="wedding-form">
+        <div class="form-group">
+          <label>Spouse Name *</label>
+          <input type="text" id="weddingSpouse" placeholder="e.g. Akua Mensah"/>
+        </div>
+        <div class="form-group">
+          <label>Wedding Date *</label>
+          <input type="date" id="weddingDate"/>
+        </div>
+        <div class="form-group">
+          <label>Wedding Venue</label>
+          <input type="text" id="weddingVenue" placeholder="e.g. Accra International Conference Centre"/>
+        </div>
+        <div class="form-group">
+          <label>Amount (GHS) *</label>
+          <input type="number" id="weddingAmount" placeholder="e.g. 500" min="1"/>
+        </div>
+        <div class="form-group">
+          <label>Payment Method</label>
+          <select id="weddingMethod">
+            <option>Cash</option>
+            <option>Mobile Money</option>
+            <option>Bank Transfer</option>
+            <option>Cheque</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Payment Date</label>
+          <input type="date" id="weddingPayDate"/>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea id="weddingNotes" placeholder="Any additional notes..."></textarea>
+        </div>
+      </div>
+      <div class="wedding-actions">
+        <button class="btn btn-outline" onclick="closeWeddingModal()">Cancel</button>
+        <button class="btn btn-pink" onclick="issueWeddingBenefit()">💍 Issue Payment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── DATA ──────────────────────────────────────────────────────────────────
+  let members = [];
+
+  let uploadedDocs    = [];
+  let memberPhotoData = null;
+  let currentEditIdx  = -1;
+  let benefitMemberIdx= -1;
+  let weddingMemberIdx= -1;
+
+  // ── AUTH ──────────────────────────────────────────────────────────────────
+  async function loadUser() {
+    try {
+      const res = await fetch('/api/me');
+      if (!res.ok) { window.location.href='/login.html'; return; }
+      const { user } = await res.json();
+      document.getElementById('topName').textContent = user.name;
+      document.getElementById('topAvatar').textContent = user.name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+      document.getElementById('profileName').value  = user.name;
+      document.getElementById('profileEmail').value = user.email;
+    } catch { window.location.href='/login.html'; }
+  }
+  async function handleLogout() { await fetch('/api/logout',{method:'POST'}); window.location.href='/'; }
+
+  async function saveProfile() {
+    const name     = document.getElementById('profileName').value.trim();
+    const email    = document.getElementById('profileEmail').value.trim();
+    const password = document.getElementById('profilePassword').value;
+    const confirm  = document.getElementById('profilePasswordConfirm').value;
+    if (!name || !email) return showToast('❌ Name and email are required.');
+    if (password && password !== confirm) return showToast('❌ Passwords do not match.');
+    try {
+      const meRes  = await fetch('/api/me');
+      const { user } = await meRes.json();
+      const profRes = await fetch(`/api/users/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email })
+      });
+      const profData = await profRes.json();
+      if (!profData.success) return showToast('❌ ' + profData.message);
+      if (password) {
+        const pwRes  = await fetch(`/api/users/${user.id}/password`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const pwData = await pwRes.json();
+        if (!pwData.success) return showToast('❌ ' + pwData.message);
+      }
+      document.getElementById('profilePassword').value = '';
+      document.getElementById('profilePasswordConfirm').value = '';
+      document.getElementById('topName').textContent = name;
+      document.getElementById('topAvatar').textContent = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+      showToast('✅ Profile updated successfully!');
+    } catch (err) {
+      showToast('❌ Failed to save profile.');
+    }
+  }
+
+  function apiMember(row) {
+    return {
+      dbId: row.id,
+      id: row.member_id,
+      name: row.first_name + ' ' + row.last_name,
+      firstName: row.first_name,
+      lastName: row.last_name,
+      phone: row.phone || '',
+      gender: row.gender || 'Male',
+      dob: row.dob || '',
+      occupation: row.occupation || '',
+      branch: row.branch || '',
+      group: row.grp || '',
+      status: row.status || 'active',
+      verified: false,
+      benefit: row.benefit || 'No',
+      capturedBy: row.captured_by || '',
+      dateCaptured: row.date_captured || '',
+      photo: row.photo || null,
+      docs: [],
+      father: { name: row.father_name||'', phone: row.father_phone||'', deceased: !!row.father_deceased, deathDate: row.father_death_date||'', cause: row.father_cause||'' },
+      mother: { name: row.mother_name||'', phone: row.mother_phone||'', deceased: !!row.mother_deceased, deathDate: row.mother_death_date||'', cause: row.mother_cause||'' },
+      benefitPayments: [],
+      weddingPayments: [],
+      death_count:   row.death_count   || 0,
+      wedding_count: row.wedding_count || 0,
+      doc_count:     row.doc_count     || 0,
+    };
+  }
+
+  async function loadMembers() {
+    try {
+      const res  = await fetch('/api/members');
+      const data = await res.json();
+      if (data.success) { members = data.data.map(apiMember); filterMembers(); }
+    } catch { showToast('❌ Failed to load members.', true); }
+  }
+
+  // ── PANELS ────────────────────────────────────────────────────────────────
+  function showPanel(id) {
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.getElementById('panel-'+id).classList.add('active');
+    if (id==='search')          filterMembers();
+    if (id==='benefits')        renderBenefitRecords();
+    if (id==='wedding-benefits') renderWeddingRecords();
+  }
+
+  // ── PARENT DECEASED TOGGLE ────────────────────────────────────────────────
+  function toggleDeceased(parent) {
+    const cb      = document.getElementById(parent+'Deceased');
+    const toggle  = document.getElementById(parent+'Toggle');
+    const label   = document.getElementById(parent+'ToggleLabel');
+    const fields  = document.getElementById(parent+'DeceasedFields');
+    const isDead  = cb.checked;
+    label.textContent  = isDead ? '🕊️ Deceased' : '✅ Alive';
+    toggle.className   = 'deceased-toggle ' + (isDead ? '' : 'alive');
+    fields.className   = 'deceased-fields ' + (isDead ? 'show' : '');
+  }
+
+  // ── RENDER MEMBERS ────────────────────────────────────────────────────────
+  function renderMembers(list) {
+    const c = document.getElementById('memberResults');
+    document.getElementById('resultsHeader').textContent = list.length+' Member'+(list.length!==1?'s':'')+' Found';
+    if (!list.length) { c.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);font-weight:700;">No members found.</div>'; return; }
+
+    c.innerHTML = list.map(m => {
+      const idx      = members.indexOf(m);
+      const initials = m.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+      const avHtml   = m.photo ? `<img src="${m.photo}" alt="${m.name}"/>` : initials;
+      const hasDeceased = (m.father && m.father.deceased) || (m.mother && m.mother.deceased);
+      const paidCount   = m.death_count||0;
+      return `
+        <div class="member-card">
+          <div class="member-top">
+            <div class="member-avatar">${avHtml}</div>
+            <div style="flex:1">
+              <div class="member-name-row">
+                <span class="member-name">${m.name}</span>
+                <span class="badge badge-green">${m.status}</span>
+                ${m.verified?'<span style="color:var(--green)">✅</span>':'<span style="color:#f59e0b">⏳</span>'}
+                ${hasDeceased?'<span class="badge badge-amber">🕊️ Deceased Parent</span>':''}
+              </div>
+              <div class="member-id-row">
+                <span class="id-pill">( ID: ${m.id} )</span>
+                <span class="id-pill purple">${m.group||'—'}</span>
+                ${m.doc_count>0?`<span class="id-pill">📎 ${m.doc_count} doc${m.doc_count>1?'s':''}</span>`:''}
+                ${m.death_count>0?`<span class="id-pill amber">💰 ${m.death_count} payment${m.death_count>1?'s':''}</span>`:''}
+                ${m.wedding_count>0?`<span class="id-pill pink">💍 ${m.wedding_count} wedding</span>`:''}
+              </div>
+            </div>
+          </div>
+          <div class="member-meta">
+            <div class="meta-item">📱 ${m.phone}</div>
+            <div class="meta-item">🏢 ${m.branch}</div>
+            <div class="meta-item">🪪 ${m.capturedBy||'—'}</div>
+            <div class="meta-item">💍 ${m.group||'—'}</div>
+            <div class="meta-item">👨 ${m.father&&m.father.name?m.father.name:'—'} ${m.father&&m.father.deceased?'🕊️':''}</div>
+            <div class="meta-item">👩 ${m.mother&&m.mother.name?m.mother.name:'—'} ${m.mother&&m.mother.deceased?'🕊️':''}</div>
+          </div>
+          <div class="member-actions">
+            <button class="action-btn ab-blue"  title="View Details"  onclick="openModal(${idx})">👁</button>
+            <button class="action-btn ab-teal"  title="Documents"     onclick="openModal(${idx},'documents')">📎</button>
+            <button class="action-btn ab-orange" title="Edit"         onclick="editMember(${idx})">✏️</button>
+            ${hasDeceased?`<button class="action-btn ab-amber" title="Issue Death Benefit" onclick="openBenefitModal(${idx})">💰</button>`:''}
+            <button class="action-btn ab-pink" title="Issue Wedding Benefit" onclick="openWeddingModal(${idx})">💍</button>
+            <button class="action-btn ab-red"   title="Delete"        onclick="deleteMember(${idx})">🗑️</button>
+          </div>
+        </div>`;
+    }).join('');
+
+    // Stats
+    const dec = members.filter(m=>(m.father&&m.father.deceased)||(m.mother&&m.mother.deceased));
+    const paid= members.reduce((s,m)=>s+(m.death_count||0),0);
+    const weds= members.reduce((s,m)=>s+(m.wedding_count||0),0);
+    document.getElementById('totalCount').textContent   = members.length;
+    document.getElementById('activeCount').textContent  = members.filter(m=>m.status==='active').length;
+    document.getElementById('deceasedCount').textContent= dec.length;
+    document.getElementById('benefitCount').textContent = paid;
+    document.getElementById('weddingCount').textContent = weds;
+  }
+
+  // ── FILTER ────────────────────────────────────────────────────────────────
+  function filterMembers() {
+    const q       = (document.getElementById('searchQuery').value||'').toLowerCase();
+    const branch  = document.getElementById('filterBranch').value;
+    const group   = document.getElementById('filterGroup').value;
+    const verified= document.getElementById('filterVerified').value;
+    const parent  = document.getElementById('filterParent').value;
+    const sort    = document.getElementById('sortOrder').value;
+    let list = members.filter(m => {
+      const matchQ = !q||m.name.toLowerCase().includes(q)||m.phone.includes(q)||m.id.includes(q)||(m.occupation||'').toLowerCase().includes(q)||(m.father&&m.father.name&&m.father.name.toLowerCase().includes(q))||(m.mother&&m.mother.name&&m.mother.name.toLowerCase().includes(q));
+      const matchB = branch==='all'||m.branch===branch;
+      const matchG = group==='all'||m.group===group;
+      const matchV = verified==='all'||(verified==='verified'&&m.verified)||(verified==='pending'&&!m.verified);
+      const hasD   = (m.father&&m.father.deceased)||(m.mother&&m.mother.deceased);
+      const matchP = parent==='all'||(parent==='deceased'&&hasD)||(parent==='alive'&&!hasD);
+      return matchQ&&matchB&&matchG&&matchV&&matchP;
+    });
+    if (sort==='az') list.sort((a,b)=>a.name.localeCompare(b.name));
+    if (sort==='za') list.sort((a,b)=>b.name.localeCompare(a.name));
+    renderMembers(list);
+  }
+
+  function clearFilters() {
+    document.getElementById('searchQuery').value='';
+    ['filterBranch','filterGroup','filterVerified','filterParent','sortOrder'].forEach(id=>{
+      document.getElementById(id).selectedIndex=0;
+    });
+    filterMembers();
+  }
+
+  // ── DELETE / EDIT ─────────────────────────────────────────────────────────
+  async function deleteMember(i) {
+    if (!confirm('Delete '+members[i].name+'?')) return;
+    try {
+      const res  = await fetch('/api/members/'+members[i].dbId, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) { await loadMembers(); showToast('Member deleted.'); }
+      else showToast('❌ ' + data.message, true);
+    } catch { showToast('❌ Failed to delete member.', true); }
+  }
+
+  function editMember(i) {
+    const m = members[i];
+    currentEditIdx = i;
+    document.getElementById('formTitle').textContent = '✏️ Edit Member';
+    document.getElementById('fullName').value = m.name || '';
+    document.getElementById('phone').value      = m.phone;
+    document.getElementById('occupation').value = m.occupation||'';
+    document.getElementById('capturedBy').value = m.capturedBy||'';
+    document.getElementById('gender').value     = m.gender||'Male';
+    document.getElementById('branch').value     = m.branch;
+    document.getElementById('group').value      = m.group;
+    document.getElementById('status').value     = m.status;
+    document.getElementById('benefit').value    = m.benefit||'No';
+    if (m.dob) document.getElementById('dob').value = m.dob;
+    if (m.dateCaptured) document.getElementById('dateCaptured').value = m.dateCaptured;
+    // Father
+    if (m.father) {
+      document.getElementById('fatherName').value  = m.father.name||'';
+      document.getElementById('fatherPhone').value = m.father.phone||'';
+      document.getElementById('fatherDeceased').checked = !!m.father.deceased;
+      document.getElementById('fatherDeathDate').value  = m.father.deathDate||'';
+      document.getElementById('fatherCause').value      = m.father.cause||'';
+      toggleDeceased('father');
+    }
+    // Mother
+    if (m.mother) {
+      document.getElementById('motherName').value  = m.mother.name||'';
+      document.getElementById('motherPhone').value = m.mother.phone||'';
+      document.getElementById('motherDeceased').checked = !!m.mother.deceased;
+      document.getElementById('motherDeathDate').value  = m.mother.deathDate||'';
+      document.getElementById('motherCause').value      = m.mother.cause||'';
+      toggleDeceased('mother');
+    }
+    if (m.photo) { memberPhotoData=m.photo; document.getElementById('photoPreview').innerHTML='<img src="'+m.photo+'" alt="photo"/>'; }
+    uploadedDocs=[...(m.docs||[])]; renderDocList();
+    showPanel('new-member');
+  }
+
+  function cancelForm() {
+    currentEditIdx=-1;
+    document.getElementById('formTitle').textContent='➕ Add New Member';
+    showPanel('search');
+  }
+
+  // ── PHOTO ─────────────────────────────────────────────────────────────────
+  function previewPhoto(e) {
+    const file=e.target.files[0]; if(!file) return;
+    const r=new FileReader();
+    r.onload=ev=>{ memberPhotoData=ev.target.result; document.getElementById('photoPreview').innerHTML='<img src="'+ev.target.result+'"/>'; };
+    r.readAsDataURL(file);
+  }
+
+  // ── DOCS ──────────────────────────────────────────────────────────────────
+  function addDocuments(e) {
+    Array.from(e.target.files).forEach(file=>{
+      const r=new FileReader();
+      r.onload=ev=>{ uploadedDocs.push({name:file.name,size:(file.size/1024).toFixed(1)+' KB',type:file.type,dataUrl:ev.target.result}); renderDocList(); };
+      r.readAsDataURL(file);
+    });
+  }
+  function renderDocList() {
+    document.getElementById('docList').innerHTML=uploadedDocs.length===0?'':
+      '<div style="margin-top:12px">'+uploadedDocs.map((d,i)=>`
+        <div class="doc-item">
+          <div class="doc-item-name"><span>${docIcon(d.type)}</span><span>${d.name}</span></div>
+          <span class="doc-size">${d.size}</span>
+          <button class="doc-remove" onclick="removeDoc(${i})">✕</button>
+        </div>`).join('')+'</div>';
+  }
+  function removeDoc(i){ uploadedDocs.splice(i,1); renderDocList(); }
+  function docIcon(t){ if(!t)return'📄'; if(t.includes('pdf'))return'📕'; if(t.includes('image'))return'🖼️'; if(t.includes('word')||t.includes('document'))return'📝'; return'📄'; }
+
+  // ── SAVE MEMBER ───────────────────────────────────────────────────────────
+  async function saveMember() {
+    const fullName=document.getElementById('fullName').value.trim();
+    const phone=document.getElementById('phone').value.trim();
+    if(!fullName||!phone){ showToast('Please fill in Full Name and Contact Number.',true); return; }
+    const nameParts=fullName.split(' ');
+    const first=nameParts[0];
+    const last=nameParts.slice(1).join(' ')||'.';
+
+    const payload={
+      firstName: first, lastName: last, phone,
+      branch:    document.getElementById('branch').value,
+      group:     document.getElementById('group').value,
+      status:    document.getElementById('status').value,
+      benefit:   document.getElementById('benefit').value,
+      occupation:document.getElementById('occupation').value||'',
+      gender:    document.getElementById('gender').value,
+      dob:       document.getElementById('dob').value||null,
+      capturedBy:document.getElementById('capturedBy').value||'Admin',
+      dateCaptured: document.getElementById('dateCaptured').value || new Date().toISOString().split('T')[0],
+      photo:     memberPhotoData,
+      docs:      [...uploadedDocs],
+      father:{
+        name:      document.getElementById('fatherName').value.trim(),
+        phone:     document.getElementById('fatherPhone').value.trim(),
+        deceased:  document.getElementById('fatherDeceased').checked,
+        deathDate: document.getElementById('fatherDeathDate').value,
+        cause:     document.getElementById('fatherCause').value.trim(),
+      },
+      mother:{
+        name:      document.getElementById('motherName').value.trim(),
+        phone:     document.getElementById('motherPhone').value.trim(),
+        deceased:  document.getElementById('motherDeceased').checked,
+        deathDate: document.getElementById('motherDeathDate').value,
+        cause:     document.getElementById('motherCause').value.trim(),
+      },
+    };
+
+    try {
+      let res, data;
+      if (currentEditIdx >= 0) {
+        res  = await fetch('/api/members/'+members[currentEditIdx].dbId, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+        data = await res.json();
+        if (data.success) showToast('✅ '+first+' '+last+' updated!');
+        else { showToast('❌ '+data.message, true); return; }
+      } else {
+        res  = await fetch('/api/members', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+        data = await res.json();
+        if (data.success) showToast('✅ '+first+' '+last+' added!');
+        else { showToast('❌ '+data.message, true); return; }
+      }
+      // Reset form
+      ['fullName','phone','occupation','capturedBy','dateCaptured','fatherName','fatherPhone','fatherDeathDate','fatherCause','motherName','motherPhone','motherDeathDate','motherCause'].forEach(id=>document.getElementById(id).value='');
+      ['fatherDeceased','motherDeceased'].forEach(id=>{ document.getElementById(id).checked=false; });
+      toggleDeceased('father'); toggleDeceased('mother');
+      document.getElementById('photoPreview').innerHTML='📷';
+      document.getElementById('formTitle').textContent='➕ Add New Member';
+      memberPhotoData=null; uploadedDocs=[]; currentEditIdx=-1; renderDocList();
+      await loadMembers();
+      setTimeout(()=>showPanel('search'),800);
+    } catch { showToast('❌ Failed to save member.', true); }
+  }
+
+  // ── MEMBER MODAL ──────────────────────────────────────────────────────────
+  function openModal(idx, tab='details') {
+    const m=members[idx];
+    currentModalDbId = m.dbId;
+    const initials=m.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('modalAvatar').innerHTML=m.photo?'<img src="'+m.photo+'" alt="'+m.name+'"/>':initials;
+    document.getElementById('modalName').textContent=m.name;
+    document.getElementById('modalId').textContent='ID: '+m.id;
+    document.getElementById('modalStatus').textContent=m.status;
+    document.getElementById('modalGroup').textContent=m.group;
+    const hasDeceased=(m.father&&m.father.deceased)||(m.mother&&m.mother.deceased);
+    document.getElementById('modalDeceasedBadge').style.display=hasDeceased?'inline-flex':'none';
+    const hasWedding=(m.wedding_count>0);
+    document.getElementById('modalWeddingBadge').style.display=hasWedding?'inline-flex':'none';
+
+    // Details tab
+    document.getElementById('modalDetailGrid').innerHTML=[
+      {label:'Contact Number',    value:m.phone},
+      {label:'Branch Station',    value:m.branch},
+      {label:'Department',        value:m.occupation||'—'},
+      {label:'Marital Status',    value:m.group||'—'},
+      {label:'Staff ID Code',     value:m.capturedBy||'—'},
+      {label:'Registration Date', value:m.dateCaptured||'—'},
+      {label:'Benefit Rcvd',      value:m.benefit||'No'},
+      {label:'Status',            value:m.status},
+    ].map(f=>`<div class="detail-item"><div class="detail-label">${f.label}</div><div class="detail-value">${f.value}</div></div>`).join('');
+
+    // Parents tab
+    const pGrid = document.getElementById('modalParentGrid');
+    const parentCard = (parent, label) => {
+      if (!parent || !parent.name) return `<div class="parent-info-card"><div class="parent-info-title">${label}</div><div style="color:var(--muted);font-size:13px;">No information provided.</div></div>`;
+      return `
+        <div class="parent-info-card ${parent.deceased?'deceased':''}">
+          <div class="parent-info-title">${label}</div>
+          <div class="parent-info-name">${parent.name}</div>
+          ${parent.phone?`<div class="parent-info-row">📱 ${parent.phone}</div>`:''}
+          ${parent.deceased?`
+            <span class="deceased-badge">🕊️ Deceased</span>
+            ${parent.deathDate?`<div class="parent-info-row" style="margin-top:8px">📅 Died: ${parent.deathDate}</div>`:''}
+            ${parent.cause?`<div class="parent-info-row">⚕️ Cause: ${parent.cause}</div>`:''}
+          `:`<span class="alive-badge">✅ Alive</span>`}
+        </div>`;
+    };
+    pGrid.innerHTML = parentCard(m.father,'👨 Father') + parentCard(m.mother,'👩 Mother');
+
+    // Docs tab — fetch from API
+    const dc=document.getElementById('modalDocList');
+    dc.innerHTML='<div style="color:var(--muted);text-align:center;padding:20px;">Loading...</div>';
+    fetch('/api/members/'+m.dbId+'/documents').then(r=>r.json()).then(({data:docs})=>{
+      if(!docs||!docs.length){ dc.innerHTML='<div class="no-docs"><div class="no-docs-icon">📭</div><p>No documents uploaded.</p></div>'; return; }
+      dc.innerHTML=docs.map(d=>`
+        <div class="doc-viewer-item">
+          <div class="doc-icon">${docIcon(d.file_type)}</div>
+          <div class="doc-info">
+            <div class="doc-name">${d.file_name}</div>
+            <div class="doc-meta">${d.file_size} • ${d.file_type||'Unknown'}</div>
+            ${d.file_type&&d.file_type.includes('image')?`<img src="${d.file_data}" class="doc-preview-img" alt="${d.file_name}"/>`:''}
+          </div>
+          <a class="doc-open-btn" href="${d.file_data}" download="${d.file_name}">⬇ Download</a>
+        </div>`).join('');
+    }).catch(()=>{ dc.innerHTML='<div class="no-docs"><p style="color:red;">Failed to load documents.</p></div>'; });
+
+    // Benefits tab — fetch from API
+    loadModalDeathBenefits(m.dbId);
+
+    // Wedding history tab — fetch from API
+    loadModalWeddingBenefits(m.dbId);
+
+    switchTab(tab, document.querySelector('.modal-tab:nth-child('+(tab==='details'?1:tab==='parents'?2:tab==='documents'?3:tab==='benefit-history'?4:5)+')'));
+    document.getElementById('memberModal').classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+
+  let currentModalDbId = null;
+
+  function loadModalDeathBenefits(dbId) {
+    if (dbId) currentModalDbId = dbId;
+    const bh = document.getElementById('modalBenefitHistory');
+    bh.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px;">Loading...</div>';
+    fetch('/api/members/' + currentModalDbId + '/death-benefits').then(r => r.json()).then(({ data: pays }) => {
+      if (!pays || !pays.length) { bh.innerHTML = '<div class="no-docs"><div class="no-docs-icon">💸</div><p>No benefit payments recorded.</p></div>'; return; }
+      const total = pays.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
+      bh.innerHTML = `
+        <div style="background:#f0fdf4;border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-weight:700;color:var(--muted)">Total Paid</span>
+          <span style="font-size:20px;font-weight:800;color:var(--green)">GHS ${total.toFixed(2)}</span>
+        </div>
+        ${pays.map(p => `
+          <div class="benefit-record" style="align-items:flex-start;gap:10px;">
+            <div class="benefit-record-left" style="flex:1;">
+              <span class="benefit-record-amount">GHS ${parseFloat(p.amount).toFixed(2)}</span>
+              <span class="benefit-record-date">📅 ${p.pay_date || ''} &nbsp;•&nbsp; ${p.method || ''}</span>
+              <span class="benefit-record-parent" style="margin-top:4px;display:inline-block;">🕊️ ${p.parent_name || ''}</span>
+              ${p.notes ? `<span style="font-size:12px;color:var(--muted)">${p.notes}</span>` : ''}
+            </div>
+            <button onclick="deleteDeathBenefit(${p.id})" title="Delete this payment" style="background:#fee2e2;border:none;border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--red);font-size:13px;font-weight:700;flex-shrink:0;">🗑️ Delete</button>
+          </div>`).join('')}`;
+    }).catch(() => { bh.innerHTML = '<div class="no-docs"><p style="color:red;">Failed to load.</p></div>'; });
+  }
+
+  async function deleteDeathBenefit(id) {
+    if (!confirm('Delete this death benefit payment? This cannot be undone.')) return;
+    const res  = await fetch('/api/death-benefits/' + id, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) { showToast('Payment deleted.'); loadModalDeathBenefits(); await loadMembers(); }
+    else showToast('❌ ' + data.message, true);
+  }
+
+  function loadModalWeddingBenefits(dbId) {
+    if (dbId) currentModalDbId = dbId;
+    const wh = document.getElementById('modalWeddingHistory');
+    wh.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px;">Loading...</div>';
+    fetch('/api/members/' + currentModalDbId + '/wedding-benefits').then(r => r.json()).then(({ data: weds }) => {
+      if (!weds || !weds.length) { wh.innerHTML = '<div class="no-docs"><div class="no-docs-icon">💍</div><p>No wedding benefit payments recorded.</p></div>'; return; }
+      const wtotal = weds.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
+      wh.innerHTML = `
+        <div style="background:var(--pink-light);border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-weight:700;color:var(--muted)">Total Wedding Benefits Paid</span>
+          <span style="font-size:20px;font-weight:800;color:#db2777;">GHS ${wtotal.toFixed(2)}</span>
+        </div>
+        ${weds.map(p => `
+          <div class="wedding-record" style="padding:14px;margin-bottom:10px;border-radius:12px;border:1.5px solid #f9a8d4;display:flex;align-items:flex-start;gap:10px;">
+            <div style="flex:1;">
+              <div class="wedding-record-amount">GHS ${parseFloat(p.amount).toFixed(2)}</div>
+              <div class="wedding-record-date">💍 ${p.spouse_name || ''} &nbsp;•&nbsp; 📅 ${p.wedding_date || ''}</div>
+              <div class="wedding-record-date">${p.venue ? '📍 ' + p.venue + ' &nbsp;•&nbsp; ' : ''} ${p.method || ''} &nbsp;•&nbsp; Paid: ${p.pay_date || ''}</div>
+              ${p.notes ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;">${p.notes}</div>` : ''}
+            </div>
+            <button onclick="deleteWeddingBenefit(${p.id})" title="Delete this payment" style="background:#fee2e2;border:none;border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--red);font-size:13px;font-weight:700;flex-shrink:0;">🗑️ Delete</button>
+          </div>`).join('')}`;
+    }).catch(() => { wh.innerHTML = '<div class="no-docs"><p style="color:red;">Failed to load.</p></div>'; });
+  }
+
+  async function deleteWeddingBenefit(id) {
+    if (!confirm('Delete this wedding benefit payment? This cannot be undone.')) return;
+    const res  = await fetch('/api/wedding-benefits/' + id, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) { showToast('Payment deleted.'); loadModalWeddingBenefits(); await loadMembers(); }
+    else showToast('❌ ' + data.message, true);
+  }
+
+  function closeModal(){ document.getElementById('memberModal').classList.remove('open'); document.body.style.overflow=''; }
+  function closeModalOnOverlay(e){ if(e.target===document.getElementById('memberModal')) closeModal(); }
+  function switchTab(id, el){
+    document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.modal-tab-content').forEach(c=>c.classList.remove('active'));
+    if(el) el.classList.add('active');
+    document.getElementById('tab-'+id).classList.add('active');
+  }
+
+  // ── BENEFIT MODAL ─────────────────────────────────────────────────────────
+  function openBenefitModal(idx) {
+    const m=members[idx];
+    benefitMemberIdx=idx;
+    const initials=m.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('benefitAvatar').innerHTML=m.photo?'<img src="'+m.photo+'"/>':initials;
+    document.getElementById('benefitMemberName').textContent=m.name;
+    document.getElementById('benefitMemberSub').textContent='ID: '+m.id+' • '+m.branch;
+    document.getElementById('benefitDate').value=new Date().toISOString().split('T')[0];
+    document.getElementById('benefitAmount').value='';
+    document.getElementById('benefitNotes').value='';
+
+    // Build deceased parents list
+    const opts=[];
+    if(m.father&&m.father.deceased&&m.father.name) opts.push({val:'Father: '+m.father.name, label:'👨 Father — '+m.father.name});
+    if(m.mother&&m.mother.deceased&&m.mother.name) opts.push({val:'Mother: '+m.mother.name, label:'👩 Mother — '+m.mother.name});
+    const sel=document.getElementById('benefitParentSelect');
+    sel.innerHTML=opts.map(o=>`<option value="${o.val}">${o.label}</option>`).join('');
+
+    // Info box
+    const info=[];
+    if(m.father&&m.father.deceased) info.push(`<strong>👨 Father (${m.father.name||'—'})</strong> deceased${m.father.deathDate?' on '+m.father.deathDate:''}.${m.father.cause?' Cause: '+m.father.cause:''}`);
+    if(m.mother&&m.mother.deceased) info.push(`<strong>👩 Mother (${m.mother.name||'—'})</strong> deceased${m.mother.deathDate?' on '+m.mother.deathDate:''}.${m.mother.cause?' Cause: '+m.mother.cause:''}`);
+    document.getElementById('benefitParentInfo').innerHTML=info.join('<br><br>');
+
+    document.getElementById('benefitModal').classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+
+  function closeBenefitModal(){ document.getElementById('benefitModal').classList.remove('open'); document.body.style.overflow=''; }
+  function closeBenefitOnOverlay(e){ if(e.target===document.getElementById('benefitModal')) closeBenefitModal(); }
+
+  async function issueBenefit(){
+    const amount=document.getElementById('benefitAmount').value;
+    if(!amount||parseFloat(amount)<=0){ showToast('Please enter a valid amount.',true); return; }
+    const m=members[benefitMemberIdx];
+    try {
+      const res = await fetch('/api/members/'+m.dbId+'/death-benefits', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          parentName: document.getElementById('benefitParentSelect').value,
+          amount:     parseFloat(amount).toFixed(2),
+          method:     document.getElementById('benefitMethod').value,
+          payDate:    document.getElementById('benefitDate').value,
+          notes:      document.getElementById('benefitNotes').value.trim(),
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        closeBenefitModal();
+        showToast('💰 GHS '+parseFloat(amount).toFixed(2)+' benefit issued to '+m.name+'!');
+        await loadMembers();
+      } else { showToast('❌ '+data.message, true); }
+    } catch { showToast('❌ Failed to issue benefit.', true); }
+  }
+
+  // ── BENEFIT RECORDS PANEL ─────────────────────────────────────────────────
+  async function renderBenefitRecords(){
+    const panel=document.getElementById('benefitRecordsPanel');
+    panel.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted);">Loading...</div>';
+    try {
+      const res = await fetch('/api/death-benefits');
+      const { success, data: all } = await res.json();
+      if (!success || !all.length) {
+        panel.innerHTML='<div class="search-card"><div class="no-docs"><div class="no-docs-icon">💸</div><p style="font-weight:700;">No benefit payments recorded yet.</p><p style="font-size:13px;margin-top:6px;">When you issue a death benefit from a member\'s card, it will appear here.</p></div></div>';
+        return;
+      }
+      const total=all.reduce((s,p)=>s+parseFloat(p.amount||0),0);
+      panel.innerHTML=`
+        <div class="search-card" style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-weight:700;font-size:16px;">Total Benefits Paid</span>
+            <span style="font-size:24px;font-weight:800;color:var(--green);">GHS ${total.toFixed(2)}</span>
+          </div>
+        </div>
+        <div class="search-card">
+          ${all.map(p=>{
+            const init=(p.member_name||'').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+            return `
+              <div class="benefit-record" style="padding:16px;margin-bottom:10px;border-radius:12px;background:#f8fafc;border:1.5px solid var(--border);">
+                <div style="display:flex;align-items:center;gap:12px;flex:1;">
+                  <div class="benefit-avatar" style="width:40px;height:40px;font-size:13px;">${p.photo?'<img src="'+p.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>':init}</div>
+                  <div class="benefit-record-left">
+                    <span style="font-weight:800;">${p.member_name||'—'}</span>
+                    <span class="benefit-record-date">ID: ${p.member_code} &nbsp;•&nbsp; 📅 ${p.pay_date||''} &nbsp;•&nbsp; ${p.method||''}</span>
+                    ${p.notes?`<span style="font-size:12px;color:var(--muted)">${p.notes}</span>`:''}
+                  </div>
+                </div>
+                <div style="text-align:right;">
+                  <div class="benefit-record-amount" style="font-size:16px;">GHS ${parseFloat(p.amount).toFixed(2)}</div>
+                  <span class="benefit-record-parent">🕊️ ${p.parent_name||''}</span>
+                </div>
+              </div>`;
+          }).join('')}
+        </div>`;
+    } catch { panel.innerHTML='<div class="search-card"><p style="color:red;">Failed to load records.</p></div>'; }
+  }
+
+  // ── WEDDING MODAL ─────────────────────────────────────────────────────────
+  function openWeddingModal(idx) {
+    const m=members[idx];
+    weddingMemberIdx=idx;
+    const initials=m.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('weddingAvatar').innerHTML=m.photo?'<img src="'+m.photo+'"/>':initials;
+    document.getElementById('weddingMemberName').textContent=m.name;
+    document.getElementById('weddingMemberSub').textContent='ID: '+m.id+' • '+m.branch;
+    document.getElementById('weddingDate').value='';
+    document.getElementById('weddingPayDate').value=new Date().toISOString().split('T')[0];
+    document.getElementById('weddingAmount').value='';
+    document.getElementById('weddingSpouse').value='';
+    document.getElementById('weddingVenue').value='';
+    document.getElementById('weddingNotes').value='';
+    document.getElementById('weddingModal').classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+
+  function closeWeddingModal(){ document.getElementById('weddingModal').classList.remove('open'); document.body.style.overflow=''; }
+  function closeWeddingOnOverlay(e){ if(e.target===document.getElementById('weddingModal')) closeWeddingModal(); }
+
+  async function issueWeddingBenefit(){
+    const spouse=document.getElementById('weddingSpouse').value.trim();
+    const wDate =document.getElementById('weddingDate').value;
+    const amount=document.getElementById('weddingAmount').value;
+    if(!spouse)  { showToast('Please enter the spouse name.',true); return; }
+    if(!wDate)   { showToast('Please enter the wedding date.',true); return; }
+    if(!amount||parseFloat(amount)<=0){ showToast('Please enter a valid amount.',true); return; }
+    const m=members[weddingMemberIdx];
+    try {
+      const res = await fetch('/api/members/'+m.dbId+'/wedding-benefits', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          spouseName:  spouse,
+          weddingDate: wDate,
+          venue:   document.getElementById('weddingVenue').value.trim(),
+          amount:  parseFloat(amount).toFixed(2),
+          method:  document.getElementById('weddingMethod').value,
+          payDate: document.getElementById('weddingPayDate').value,
+          notes:   document.getElementById('weddingNotes').value.trim(),
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        closeWeddingModal();
+        showToast('💍 GHS '+parseFloat(amount).toFixed(2)+' wedding benefit issued to '+m.name+'!');
+        await loadMembers();
+      } else { showToast('❌ '+data.message, true); }
+    } catch { showToast('❌ Failed to issue wedding benefit.', true); }
+  }
+
+  // ── WEDDING RECORDS PANEL ─────────────────────────────────────────────────
+  async function renderWeddingRecords(){
+    const panel=document.getElementById('weddingRecordsPanel');
+    panel.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted);">Loading...</div>';
+    try {
+      const res = await fetch('/api/wedding-benefits');
+      const { success, data: all } = await res.json();
+      if (!success || !all.length) {
+        panel.innerHTML='<div class="search-card"><div class="no-docs"><div class="no-docs-icon">💍</div><p style="font-weight:700;">No wedding benefit payments recorded yet.</p><p style="font-size:13px;margin-top:6px;">Click the 💍 button on any member card to issue a wedding benefit.</p></div></div>';
+        return;
+      }
+      const total=all.reduce((s,p)=>s+parseFloat(p.amount||0),0);
+      panel.innerHTML=`
+        <div class="search-card" style="margin-bottom:16px;border-top:4px solid #db2777;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-weight:700;font-size:16px;">Total Wedding Benefits Paid</span>
+            <span style="font-size:24px;font-weight:800;color:#db2777;">GHS ${total.toFixed(2)}</span>
+          </div>
+        </div>
+        <div class="search-card">
+          ${all.map(p=>{
+            const init=(p.member_name||'').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+            return `
+              <div style="display:flex;align-items:center;gap:14px;padding:16px;margin-bottom:10px;border-radius:12px;background:#f8fafc;border:1.5px solid #f9a8d4;">
+                <div class="wedding-avatar" style="width:44px;height:44px;font-size:13px;flex-shrink:0;">${p.photo?'<img src="'+p.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>':init}</div>
+                <div style="flex:1;">
+                  <div style="font-weight:800;font-size:14px;">${p.member_name||'—'} <span style="font-weight:400;color:var(--muted)">weds</span> ${p.spouse_name||''}</div>
+                  <div style="font-size:12px;color:var(--muted);margin-top:2px;">ID: ${p.member_code} &nbsp;•&nbsp; 💒 ${p.wedding_date||''} ${p.venue?'&nbsp;•&nbsp; 📍 '+p.venue:''}</div>
+                  <div style="font-size:12px;color:var(--muted);">${p.method||''} &nbsp;•&nbsp; Paid: ${p.pay_date||''}</div>
+                  ${p.notes?`<div style="font-size:12px;color:var(--muted);margin-top:2px;">${p.notes}</div>`:''}
+                </div>
+                <div style="text-align:right;flex-shrink:0;">
+                  <div style="font-size:18px;font-weight:800;color:#db2777;">GHS ${parseFloat(p.amount).toFixed(2)}</div>
+                  <span class="wedding-record-badge">💍 Wedding</span>
+                </div>
+              </div>`;
+          }).join('')}
+        </div>`;
+    } catch { panel.innerHTML='<div class="search-card"><p style="color:red;">Failed to load records.</p></div>'; }
+  }
+
+  // ── TOAST ─────────────────────────────────────────────────────────────────
+  function showToast(msg,isError=false){
+    const t=document.getElementById('toast');
+    t.textContent=msg; t.style.background=isError?'var(--red)':'var(--green)';
+    t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3500);
+  }
+
+  // ── INIT ──────────────────────────────────────────────────────────────────
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'){closeModal();closeBenefitModal();closeWeddingModal();} });
+  loadUser();
+  loadMembers();
+</script>
+</body>
+</html>

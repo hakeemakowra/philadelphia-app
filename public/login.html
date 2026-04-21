@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pokuase Staff Database</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --teal: #1ab5b5;
+      --teal-dark: #0e8f8f;
+      --teal-light: #5ecece;
+      --purple: #6b21a8;
+      --red: #dc2626;
+      --white: #ffffff;
+    }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(135deg, #c8d8e4 0%, #dde8f0 50%, #b8cfe0 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .login-card {
+      background: var(--white);
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+      padding: 40px 44px 36px;
+      width: 100%;
+      max-width: 420px;
+      animation: cardIn 0.5s ease both;
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: scale(0.95) translateY(20px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .login-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--teal-dark);
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: #f8fbfc;
+      border: 1.5px solid #d0ecec;
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 28px;
+    }
+    .brand-icon {
+      width: 60px; height: 60px;
+      background: radial-gradient(circle at 40% 35%, #2a1e6e 0%, #1a0e50 60%, #0d0830 100%);
+      border-radius: 50%;
+      border: 2px solid var(--teal-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+      box-shadow: 0 0 16px rgba(26,181,181,0.4);
+    }
+    .brand-icon::before { content: '♛'; color: gold; }
+    .brand-text {
+      font-family: 'Cinzel', serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--purple);
+      letter-spacing: 1px;
+      line-height: 1.6;
+    }
+
+    .input-group {
+      background: #f0f9f9;
+      border: 1.5px solid #b8e4e4;
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 18px;
+    }
+    .input-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 10px;
+      display: block;
+      letter-spacing: 0.5px;
+    }
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .input-icon {
+      width: 40px; height: 40px;
+      background: var(--red);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .input-row input {
+      flex: 1;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 14px;
+      color: #333;
+      outline: none;
+      transition: border-color 0.25s, box-shadow 0.25s;
+      background: white;
+    }
+    .input-row input:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(26,181,181,0.15);
+    }
+    .input-row input.error {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(220,38,38,0.12);
+    }
+
+    .pwd-wrapper { position: relative; flex: 1; }
+    .pwd-wrapper input { width: 100%; padding-right: 36px; }
+    .pwd-toggle {
+      position: absolute;
+      right: 10px; top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #999;
+      font-size: 15px;
+      user-select: none;
+    }
+
+    /* Error message */
+    .error-msg {
+      display: none;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #b91c1c;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      text-align: center;
+      animation: shake 0.35s ease;
+    }
+    .error-msg.visible { display: block; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25%       { transform: translateX(-6px); }
+      75%       { transform: translateX(6px); }
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(14,143,143,0.35);
+      margin-top: 4px;
+      position: relative;
+    }
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(14,143,143,0.5);
+    }
+    .submit-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    .submit-btn .spinner {
+      display: none;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+    .submit-btn.loading .btn-text { display: none; }
+    .submit-btn.loading .spinner { display: block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 18px;
+      font-size: 12px;
+      color: #888;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--teal-dark); }
+
+    /* Demo hint */
+    .demo-hint {
+      margin-top: 20px;
+      padding: 12px 16px;
+      background: #f0f9f9;
+      border: 1px dashed var(--teal-light);
+      border-radius: 10px;
+      font-size: 11px;
+      color: #555;
+      line-height: 1.7;
+    }
+    .demo-hint strong { color: var(--teal-dark); display: block; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <h2 class="login-title">Login</h2>
+
+    <div class="brand-box">
+      <div class="brand-icon"></div>
+      <div class="brand-text">POKUASE STAFF<br>DATABASE APP</div>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <div class="input-group">
+      <label class="input-label">Email Address</label>
+      <div class="input-row">
+        <div class="input-icon">✉</div>
+        <input type="email" id="email" placeholder="hakeem.akowra10@gmail.com.com" autocomplete="email"/>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label class="input-label">Password</label>
+      <div class="input-row">
+        <div class="input-icon">🔒</div>
+        <div class="pwd-wrapper">
+          <input type="password" id="password" placeholder="••••••••••" autocomplete="current-password"/>
+          <span class="pwd-toggle" id="eyeIcon" onclick="togglePwd()">👁</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="handleLogin()">
+      <span class="btn-text">Submit</span>
+      <span class="spinner"></span>
+    </button>
+
+    <a href="/" class="back-link">← Back to Home</a>
+
+    
+  </div>
+
+  <script>
+    function togglePwd() {
+      const inp = document.getElementById('password');
+      const icon = document.getElementById('eyeIcon');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      icon.textContent = inp.type === 'password' ? '👁' : '🙈';
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('errorMsg');
+      el.textContent = msg;
+      el.classList.remove('visible');
+      // Force reflow to restart animation
+      void el.offsetWidth;
+      el.classList.add('visible');
+    }
+
+    async function handleLogin() {
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const btn      = document.getElementById('submitBtn');
+
+      // Client-side validation
+      if (!email || !password) {
+        showError('Please enter your email and password.');
+        return;
+      }
+
+      // Loading state
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          // Redirect to dashboard on success
+          window.location.href = data.redirectTo;
+        } else {
+          showError(data.message || 'Login failed. Please try again.');
+          btn.classList.remove('loading');
+          btn.disabled = false;
+        }
+      } catch (err) {
+        showError('Network error. Is the server running?');
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    }
+
+    // Allow Enter key to submit
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleLogin();
+    });
+  </script>
+</body>
+</html>
