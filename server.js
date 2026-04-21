@@ -35,17 +35,7 @@ function generateMemberId() {
 // ══════════════════════════════════════════════════════════
 //  AUTH ROUTES
 // ══════════════════════════════════════════════════════════
-app.get('/api/setup', async (req, res) => {
-  try {
-    const hash = await bcrypt.hash('admin123', 10);
-    await db.query('DELETE FROM users WHERE email = ?', ['admin@philadelphia.com']);
-    await db.query('INSERT INTO users (name, email, password, role) VALUES (?,?,?,?)',
-      ['Admin User', 'admin@philadelphia.com', hash, 'Admin']);
-    res.json({ success: true, message: 'Admin created!' });
-  } catch(err) {
-    res.json({ success: false, message: err.message });
-  }
-});
+
 app.get('/', (req, res) => {
   if (req.session.user) return res.redirect('/dashboard.html');
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
