@@ -72,13 +72,13 @@
 
     /* MEMBER CARDS */
     .results-header{font-size:16px;font-weight:800;border-bottom:2px solid var(--teal);padding-bottom:10px;margin-bottom:16px;}
-    .member-card{background:white;border-radius:16px;padding:20px 24px;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,0.06);transition:transform 0.2s,box-shadow 0.2s;}
-    .member-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.1);}
-    .member-top{display:flex;align-items:center;gap:16px;margin-bottom:16px;}
-    .member-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--purple));display:flex;align-items:center;justify-content:center;color:white;font-size:22px;font-weight:800;flex-shrink:0;overflow:hidden;}
+    .member-card{background:white;border-radius:12px;padding:12px 16px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,0.06);transition:transform 0.2s,box-shadow 0.2s;}
+    .member-card:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,0.1);}
+    .member-top{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+    .member-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--purple));display:flex;align-items:center;justify-content:center;color:white;font-size:15px;font-weight:800;flex-shrink:0;overflow:hidden;}
     .member-avatar img{width:100%;height:100%;object-fit:cover;}
-    .member-name-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
-    .member-name{font-size:17px;font-weight:800;}
+    .member-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
+    .member-name{font-size:15px;font-weight:800;}
     .badge{padding:3px 12px;border-radius:50px;font-size:11px;font-weight:700;}
     .badge-green{background:#dcfce7;color:var(--green);}
     .badge-amber{background:#fef3c7;color:var(--amber);}
@@ -86,10 +86,10 @@
     .id-pill{padding:4px 12px;border-radius:50px;border:1.5px solid var(--border);font-size:12px;font-weight:700;}
     .id-pill.purple{background:var(--purple);color:white;border-color:var(--purple);}
     .id-pill.amber{background:#fef3c7;color:var(--amber);border-color:#fbbf24;}
-    .member-meta{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:13px;color:var(--muted);border-top:1px solid var(--border);padding-top:14px;}
+    .member-meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:8px;margin-bottom:8px;}
     .meta-item{display:flex;align-items:center;gap:8px;}
-    .member-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
-    .action-btn{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;border:none;transition:transform 0.15s,box-shadow 0.15s;}
+    .member-actions{display:flex;gap:6px;margin-top:0;flex-wrap:wrap;}
+    .action-btn{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;border:none;transition:transform 0.15s,box-shadow 0.15s;}
     .action-btn:hover{transform:scale(1.18);box-shadow:0 4px 12px rgba(0,0,0,0.15);}
     .ab-blue{background:#dbeafe;} .ab-teal{background:var(--teal-light);} .ab-orange{background:#fff7ed;} .ab-red{background:#fee2e2;} .ab-amber{background:#fef3c7;}
 
@@ -762,12 +762,11 @@
             </div>
           </div>
           <div class="member-meta">
-            <div class="meta-item">📱 ${m.phone}</div>
-            <div class="meta-item">🏢 ${m.branch}</div>
-            <div class="meta-item">🪪 ${m.capturedBy||'—'}</div>
-            <div class="meta-item">💍 ${m.group||'—'}</div>
-            <div class="meta-item">👨 ${m.father&&m.father.name?m.father.name:'—'} ${m.father&&m.father.deceased?'🕊️':''}</div>
-            <div class="meta-item">👩 ${m.mother&&m.mother.name?m.mother.name:'—'} ${m.mother&&m.mother.deceased?'🕊️':''}</div>
+            <span>📱 ${m.phone}</span>
+            <span>🏢 ${m.branch}</span>
+            <span>🪪 ${m.capturedBy||'—'}</span>
+            ${m.father&&m.father.name?`<span>👨 ${m.father.name} ${m.father.deceased?'🕊️':''}</span>`:''}
+            ${m.mother&&m.mother.name?`<span>👩 ${m.mother.name} ${m.mother.deceased?'🕊️':''}</span>`:''}
           </div>
           <div class="member-actions">
             <button class="action-btn ab-blue"  title="View Details"  onclick="openModal(${idx})">👁</button>
