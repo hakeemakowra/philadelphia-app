@@ -72,26 +72,32 @@
 
     /* MEMBER CARDS */
     .results-header{font-size:16px;font-weight:800;border-bottom:2px solid var(--teal);padding-bottom:10px;margin-bottom:16px;}
-    .member-card{background:white;border-radius:12px;padding:12px 16px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,0.06);transition:transform 0.2s,box-shadow 0.2s;}
-    .member-card:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,0.1);}
-    .member-top{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
-    .member-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--purple));display:flex;align-items:center;justify-content:center;color:white;font-size:15px;font-weight:800;flex-shrink:0;overflow:hidden;}
-    .member-avatar img{width:100%;height:100%;object-fit:cover;}
-    .member-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
-    .member-name{font-size:15px;font-weight:800;}
-    .badge{padding:3px 12px;border-radius:50px;font-size:11px;font-weight:700;}
+    /* ── MEMBER GRID CARDS ── */
+    #memberResults{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;}
+    .member-card{background:white;border-radius:18px;padding:0 0 16px;box-shadow:0 2px 14px rgba(0,0,0,0.08);transition:transform 0.2s,box-shadow 0.2s;overflow:hidden;display:flex;flex-direction:column;align-items:center;}
+    .member-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.13);}
+    .mc-photo{width:100%;height:140px;background:linear-gradient(135deg,var(--teal),var(--purple));display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:800;color:white;overflow:hidden;border-radius:18px 18px 0 0;}
+    .mc-photo img{width:100%;height:100%;object-fit:cover;}
+    .mc-crown{font-size:20px;margin:10px 0 4px;}
+    .mc-name{font-size:14px;font-weight:800;color:var(--purple);text-transform:uppercase;text-align:center;padding:0 12px;letter-spacing:0.5px;}
+    .mc-id{background:var(--purple);color:white;border-radius:8px;padding:5px 20px;font-size:13px;font-weight:800;margin:8px 0;letter-spacing:1px;}
+    .mc-info-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:calc(100% - 24px);margin:8px 0;}
+    .mc-info-box{background:#f5f3ff;border-radius:10px;padding:8px 6px;text-align:center;}
+    .mc-info-label{font-size:9px;font-weight:800;color:var(--purple);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px;}
+    .mc-info-value{font-size:12px;font-weight:700;color:#333;}
+    .mc-dept{background:#f5f3ff;border-radius:10px;padding:9px 12px;width:calc(100% - 24px);text-align:center;font-size:12px;font-weight:800;color:var(--purple);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;}
+    .mc-phone{background:#f5f3ff;border-radius:10px;padding:8px 12px;width:calc(100% - 24px);text-align:center;font-size:12px;font-weight:600;color:#444;margin-bottom:10px;}
+    .mc-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:0 12px;}
+    .action-btn{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;border:none;transition:transform 0.15s,box-shadow 0.15s;}
+    .action-btn:hover{transform:scale(1.15);box-shadow:0 4px 10px rgba(0,0,0,0.15);}
+    .ab-blue{background:#dbeafe;} .ab-teal{background:var(--teal-light);} .ab-orange{background:#fff7ed;} .ab-red{background:#fee2e2;} .ab-amber{background:#fef3c7;} .ab-pink{background:#fce7f3;}
+    .badge{padding:3px 10px;border-radius:50px;font-size:10px;font-weight:700;}
     .badge-green{background:#dcfce7;color:var(--green);}
     .badge-amber{background:#fef3c7;color:var(--amber);}
-    .member-id-row{display:flex;gap:8px;flex-wrap:wrap;}
-    .id-pill{padding:4px 12px;border-radius:50px;border:1.5px solid var(--border);font-size:12px;font-weight:700;}
+    .id-pill{padding:3px 10px;border-radius:50px;border:1.5px solid var(--border);font-size:11px;font-weight:700;}
     .id-pill.purple{background:var(--purple);color:white;border-color:var(--purple);}
     .id-pill.amber{background:#fef3c7;color:var(--amber);border-color:#fbbf24;}
-    .member-meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:8px;margin-bottom:8px;}
-    .meta-item{display:flex;align-items:center;gap:8px;}
-    .member-actions{display:flex;gap:6px;margin-top:0;flex-wrap:wrap;}
-    .action-btn{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;border:none;transition:transform 0.15s,box-shadow 0.15s;}
-    .action-btn:hover{transform:scale(1.18);box-shadow:0 4px 12px rgba(0,0,0,0.15);}
-    .ab-blue{background:#dbeafe;} .ab-teal{background:var(--teal-light);} .ab-orange{background:#fff7ed;} .ab-red{background:#fee2e2;} .ab-amber{background:#fef3c7;}
+    .id-pill.pink{background:#fce7f3;color:#db2777;border-color:#f9a8d4;}
 
     /* FORM CARD */
     .form-card{background:white;border-radius:16px;padding:32px;box-shadow:0 2px 12px rgba(0,0,0,0.06);max-width:960px;}
@@ -736,45 +742,30 @@
     if (!list.length) { c.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);font-weight:700;">No members found.</div>'; return; }
 
     c.innerHTML = list.map(m => {
-      const idx      = members.indexOf(m);
-      const initials = m.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
-      const avHtml   = m.photo ? `<img src="${m.photo}" alt="${m.name}"/>` : initials;
+      const idx         = members.indexOf(m);
+      const initials    = m.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
       const hasDeceased = (m.father && m.father.deceased) || (m.mother && m.mother.deceased);
-      const paidCount   = m.death_count||0;
+      const branch      = (m.branch||'').replace(' Branch','').replace(' Station','');
+      const regDate     = m.dateCaptured ? m.dateCaptured.toString().slice(0,10) : '—';
       return `
         <div class="member-card">
-          <div class="member-top">
-            <div class="member-avatar">${avHtml}</div>
-            <div style="flex:1">
-              <div class="member-name-row">
-                <span class="member-name">${m.name}</span>
-                <span class="badge badge-green">${m.status}</span>
-                ${m.verified?'<span style="color:var(--green)">✅</span>':'<span style="color:#f59e0b">⏳</span>'}
-                ${hasDeceased?'<span class="badge badge-amber">🕊️ Deceased Parent</span>':''}
-              </div>
-              <div class="member-id-row">
-                <span class="id-pill">( ID: ${m.id} )</span>
-                <span class="id-pill purple">${m.group||'—'}</span>
-                ${m.doc_count>0?`<span class="id-pill">📎 ${m.doc_count} doc${m.doc_count>1?'s':''}</span>`:''}
-                ${m.death_count>0?`<span class="id-pill amber">💰 ${m.death_count} payment${m.death_count>1?'s':''}</span>`:''}
-                ${m.wedding_count>0?`<span class="id-pill pink">💍 ${m.wedding_count} wedding</span>`:''}
-              </div>
-            </div>
+          <div class="mc-photo">${m.photo?`<img src="${m.photo}" alt="${m.name}"/>`:`${initials}`}</div>
+          <div class="mc-crown">👑</div>
+          <div class="mc-name">${m.name}</div>
+          <div class="mc-id">${m.id}</div>
+          <div class="mc-info-row">
+            <div class="mc-info-box"><div class="mc-info-label">Enrolled</div><div class="mc-info-value">${regDate}</div></div>
+            <div class="mc-info-box"><div class="mc-info-label">Station</div><div class="mc-info-value">${branch||'—'}</div></div>
           </div>
-          <div class="member-meta">
-            <span>📱 ${m.phone}</span>
-            <span>🏢 ${m.branch}</span>
-            <span>🪪 ${m.capturedBy||'—'}</span>
-            ${m.father&&m.father.name?`<span>👨 ${m.father.name} ${m.father.deceased?'🕊️':''}</span>`:''}
-            ${m.mother&&m.mother.name?`<span>👩 ${m.mother.name} ${m.mother.deceased?'🕊️':''}</span>`:''}
-          </div>
-          <div class="member-actions">
-            <button class="action-btn ab-blue"  title="View Details"  onclick="openModal(${idx})">👁</button>
-            <button class="action-btn ab-teal"  title="Documents"     onclick="openModal(${idx},'documents')">📎</button>
-            <button class="action-btn ab-orange" title="Edit"         onclick="editMember(${idx})">✏️</button>
-            ${hasDeceased?`<button class="action-btn ab-amber" title="Issue Death Benefit" onclick="openBenefitModal(${idx})">💰</button>`:''}
-            <button class="action-btn ab-pink" title="Issue Wedding Benefit" onclick="openWeddingModal(${idx})">💍</button>
-            <button class="action-btn ab-red"   title="Delete"        onclick="deleteMember(${idx})">🗑️</button>
+          <div class="mc-dept">${m.occupation||'—'}</div>
+          <div class="mc-phone">📞 ${m.phone}</div>
+          <div class="mc-actions">
+            <button class="action-btn ab-blue"   title="View"         onclick="openModal(${idx})">👁</button>
+            <button class="action-btn ab-orange"  title="Edit"         onclick="editMember(${idx})">✏️</button>
+            <button class="action-btn ab-teal"   title="Documents"    onclick="openModal(${idx},'documents')">📎</button>
+            ${hasDeceased?`<button class="action-btn ab-amber" title="Death Benefit" onclick="openBenefitModal(${idx})">💰</button>`:''}
+            <button class="action-btn ab-pink"   title="Wedding"      onclick="openWeddingModal(${idx})">💍</button>
+            <button class="action-btn ab-red"    title="Delete"       onclick="deleteMember(${idx})">🗑️</button>
           </div>
         </div>`;
     }).join('');
