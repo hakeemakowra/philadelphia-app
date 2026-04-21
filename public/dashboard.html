@@ -76,8 +76,9 @@
     #memberResults{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;}
     .member-card{background:white;border-radius:18px;padding:0 0 16px;box-shadow:0 2px 14px rgba(0,0,0,0.08);transition:transform 0.2s,box-shadow 0.2s;overflow:hidden;display:flex;flex-direction:column;align-items:center;}
     .member-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.13);}
-    .mc-photo{width:100%;height:140px;background:linear-gradient(135deg,var(--teal),var(--purple));display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:800;color:white;overflow:hidden;border-radius:18px 18px 0 0;}
-    .mc-photo img{width:100%;height:100%;object-fit:cover;}
+    .mc-photo-header{width:100%;height:80px;background:linear-gradient(135deg,var(--teal),var(--purple));border-radius:18px 18px 0 0;position:relative;margin-bottom:55px;}
+    .mc-photo{width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--purple));display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:800;color:white;overflow:hidden;position:absolute;bottom:-55px;left:50%;transform:translateX(-50%);border:4px solid white;box-shadow:0 4px 16px rgba(0,0,0,0.18);}
+    .mc-photo img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
     .mc-crown{font-size:20px;margin:10px 0 4px;}
     .mc-name{font-size:14px;font-weight:800;color:var(--purple);text-transform:uppercase;text-align:center;padding:0 12px;letter-spacing:0.5px;}
     .mc-id{background:var(--purple);color:white;border-radius:8px;padding:5px 20px;font-size:13px;font-weight:800;margin:8px 0;letter-spacing:1px;}
@@ -749,7 +750,7 @@
       const regDate     = m.dateCaptured ? m.dateCaptured.toString().slice(0,10) : '—';
       return `
         <div class="member-card">
-          <div class="mc-photo">${m.photo?`<img src="${m.photo}" alt="${m.name}"/>`:`${initials}`}</div>
+          <div class="mc-photo-header"><div class="mc-photo">${m.photo?`<img src="${m.photo}" alt="${m.name}"/>`:`${initials}`}</div></div>
           <div class="mc-crown">👑</div>
           <div class="mc-name">${m.name}</div>
           <div class="mc-id">${m.id}</div>
