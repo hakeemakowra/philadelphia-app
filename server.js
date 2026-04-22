@@ -108,10 +108,10 @@ app.post('/api/members', requireAuth, async (req, res) => {
     const {
       firstName, lastName, phone, gender, dob, occupation,
       branch, group, status, benefit, capturedBy, dateCaptured, photo,
-      father, mother, docs
+      father, mother, docs, memberId: customId
     } = req.body;
 
-    const memberId = generateMemberId();
+    const memberId = (customId || '').trim() || generateMemberId();
     const [result] = await conn.query(
       `INSERT INTO members
         (member_id, first_name, last_name, phone, gender, dob, occupation,
