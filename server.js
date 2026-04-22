@@ -17,7 +17,7 @@ app.use(cookieSession({
   secret: process.env.SESSION_SECRET || 'philly-secret-2024',
   maxAge: 1000 * 60 * 60 * 8,
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
+  secure: false,
   sameSite: 'lax',
 }));
 
