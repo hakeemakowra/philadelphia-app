@@ -630,13 +630,13 @@
   async function loadUser() {
     try {
       const res = await fetch('/api/me');
-      if (!res.ok) { window.location.href='/login.html'; return; }
+      if (!res.ok) { window.location.href='/login'; return; }
       const { user } = await res.json();
       document.getElementById('topName').textContent = user.name;
       document.getElementById('topAvatar').textContent = user.name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
       document.getElementById('profileName').value  = user.name;
       document.getElementById('profileEmail').value = user.email;
-    } catch { window.location.href='/login.html'; }
+    } catch { window.location.href='/login'; }
   }
   async function handleLogout() { await fetch('/api/logout',{method:'POST'}); window.location.href='/'; }
 

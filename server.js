@@ -37,9 +37,22 @@ function generateMemberId() {
 // ══════════════════════════════════════════════════════════
 
 app.get('/', (req, res) => {
-  if (req.session.user) return res.redirect('/dashboard.html');
+  if (req.session.user) return res.redirect('/dashboard');
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+
+// Clean URLs — no .html in browser
+app.get('/dashboard', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+app.get('/login', (req, res) => {
+  if (req.session.user) return res.redirect('/dashboard');
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+// Redirect old .html URLs to clean ones
+app.get('/dashboard.html', (req, res) => res.redirect(301, '/dashboard'));
+app.get('/login.html',     (req, res) => res.redirect(301, '/login'));
 
 // POST /api/login
 app.post('/api/login', async (req, res) => {
@@ -55,7 +68,7 @@ app.post('/api/login', async (req, res) => {
     if (!match)
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     req.session.user = { id: user.id, name: user.name, email: user.email, role: user.role };
-    res.json({ success: true, redirectTo: '/dashboard.html' });
+    res.json({ success: true, redirectTo: '/dashboard' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'DB error: ' + err.message });
