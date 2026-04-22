@@ -1,17 +1,8 @@
-{
-  "name": "philadelphia-movement-app",
-  "version": "1.0.0",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
-  },
-  "dependencies": {
+"dependencies": {
     "bcryptjs": "^2.4.3",
     "cookie-session": "^2.1.1",
     "dotenv": "^17.4.2",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
-    "mysql2": "^3.22.1"
+    "postgres": "^3.4.4"
   }
-}
