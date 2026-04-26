@@ -67,6 +67,7 @@ app.post('/api/login', async (req, res) => {
     if (!match)
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     req.session.user = { id: user.id, name: user.name, email: user.email, role: user.role, photo: user.photo || null };
+    // photo comes from SELECT * — if column missing, photo will be undefined (safe)
     res.json({ success: true, redirectTo: '/dashboard' });
   } catch (err) {
     console.error(err);
@@ -74,23 +75,17 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// GET /api/me
-app.get('/api/me', requireAuth, async (req, res) => {
-  try {
-    const [rows] = await db.query('SELECT id, name, email, role, photo FROM users WHERE id = ?', [req.session.user.id]);
-    if (!rows.length) return res.json({ success: true, user: req.session.user });
-    res.json({ success: true, user: rows[0] });
-  } catch (err) {
-    // photo column may not exist yet — fall back to session data
-    res.json({ success: true, user: req.session.user });
-  }
+// GET /api/me — fast: reads from session only
+app.get('/api/me', requireAuth, (req, res) => {
+  res.json({ success: true, user: req.session.user });
 });
 
-// PUT /api/users/:id/photo — save profile photo
+// PUT /api/users/:id/photo — save photo to DB and update session
 app.put('/api/users/:id/photo', requireAuth, async (req, res) => {
   try {
     const { photo } = req.body;
     await db.query('UPDATE users SET photo = ? WHERE id = ?', [photo, req.params.id]);
+    req.session.user = { ...req.session.user, photo };
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to save photo.' });
