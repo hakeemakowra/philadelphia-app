@@ -692,15 +692,23 @@
     }
   }
 
+  let currentUserId = null;
+
   function handleProfilePhoto(e) {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = ev => {
+    reader.onload = async ev => {
       const dataUrl = ev.target.result;
-      localStorage.setItem('profilePhoto', dataUrl);
       applyProfilePhoto(dataUrl, '');
-      showToast('✅ Profile photo updated!');
+      try {
+        await fetch(`/api/users/${currentUserId}/photo`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ photo: dataUrl })
+        });
+        showToast('✅ Profile photo saved!');
+      } catch { showToast('❌ Failed to save photo.'); }
     };
     reader.readAsDataURL(file);
   }
@@ -710,13 +718,13 @@
       const res = await fetch('/api/me');
       if (!res.ok) { window.location.href='/login'; return; }
       const { user } = await res.json();
+      currentUserId = user.id;
       const initials = user.name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
       document.getElementById('topName').textContent = user.name;
       document.getElementById('profileName').value  = user.name;
       document.getElementById('profileEmail').value = user.email;
       document.getElementById('profilePhotoInitials').textContent = initials;
-      const saved = localStorage.getItem('profilePhoto');
-      applyProfilePhoto(saved || null, initials);
+      applyProfilePhoto(user.photo || null, initials);
     } catch { window.location.href='/login'; }
   }
   async function handleLogout() { await fetch('/api/logout',{method:'POST'}); window.location.href='/'; }
@@ -751,8 +759,9 @@
       document.getElementById('profilePasswordConfirm').value = '';
       document.getElementById('topName').textContent = name;
       const newInitials = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
-      const saved = localStorage.getItem('profilePhoto');
-      applyProfilePhoto(saved || null, newInitials);
+      const meRes2 = await fetch('/api/me');
+      const { user: u2 } = await meRes2.json();
+      applyProfilePhoto(u2.photo || null, newInitials);
       showToast('✅ Profile updated successfully!');
     } catch (err) {
       showToast('❌ Failed to save profile.');

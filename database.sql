@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
   email        VARCHAR(100) NOT NULL UNIQUE,
   password     VARCHAR(255) NOT NULL,
   role         ENUM('Admin','Member','Staff') DEFAULT 'Staff',
+  photo        LONGTEXT,
   created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -66,7 +66,7 @@ app.post('/api/login', async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match)
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
-    req.session.user = { id: user.id, name: user.name, email: user.email, role: user.role };
+    req.session.user = { id: user.id, name: user.name, email: user.email, role: user.role, photo: user.photo || null };
     res.json({ success: true, redirectTo: '/dashboard' });
   } catch (err) {
     console.error(err);
@@ -75,8 +75,25 @@ app.post('/api/login', async (req, res) => {
 });
 
 // GET /api/me
-app.get('/api/me', requireAuth, (req, res) => {
-  res.json({ success: true, user: req.session.user });
+app.get('/api/me', requireAuth, async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT id, name, email, role, photo FROM users WHERE id = ?', [req.session.user.id]);
+    if (!rows.length) return res.status(404).json({ success: false, message: 'User not found.' });
+    res.json({ success: true, user: rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+});
+
+// PUT /api/users/:id/photo — save profile photo
+app.put('/api/users/:id/photo', requireAuth, async (req, res) => {
+  try {
+    const { photo } = req.body;
+    await db.query('UPDATE users SET photo = ? WHERE id = ?', [photo, req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to save photo.' });
+  }
 });
 
 // POST /api/logout
