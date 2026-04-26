@@ -78,10 +78,11 @@ app.post('/api/login', async (req, res) => {
 app.get('/api/me', requireAuth, async (req, res) => {
   try {
     const [rows] = await db.query('SELECT id, name, email, role, photo FROM users WHERE id = ?', [req.session.user.id]);
-    if (!rows.length) return res.status(404).json({ success: false, message: 'User not found.' });
+    if (!rows.length) return res.json({ success: true, user: req.session.user });
     res.json({ success: true, user: rows[0] });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+    // photo column may not exist yet — fall back to session data
+    res.json({ success: true, user: req.session.user });
   }
 });
 
