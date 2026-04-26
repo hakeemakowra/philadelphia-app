@@ -79,7 +79,11 @@
     .mc-photo-header{width:100%;height:100px;background:linear-gradient(135deg,var(--teal),var(--purple));border-radius:20px 20px 0 0;position:relative;margin-bottom:70px;}
     .mc-photo{width:140px;height:140px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--purple));display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:800;color:white;overflow:hidden;position:absolute;bottom:-70px;left:50%;transform:translateX(-50%);border:5px solid white;box-shadow:0 4px 18px rgba(0,0,0,0.18);}
     .mc-photo img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
-    .mc-crown{font-size:20px;margin:10px 0 4px;}
+    .mc-badge{position:absolute;top:14px;right:-26px;width:110px;padding:5px 0;text-align:center;font-size:10px;font-weight:900;letter-spacing:0.6px;transform:rotate(35deg);z-index:5;box-shadow:0 2px 6px rgba(0,0,0,0.2);}
+    .mc-badge.verified{background:#22c55e;color:white;}
+    .mc-badge.incomplete{background:#f97316;color:white;}
+    .mc-crown{margin:10px 0 2px;width:80px;height:58px;display:flex;align-items:center;justify-content:center;}
+    .mc-crown img{width:100%;height:100%;object-fit:contain;}
     .mc-name{font-size:14px;font-weight:800;color:var(--purple);text-transform:uppercase;text-align:center;padding:0 12px;letter-spacing:0.5px;}
     .mc-id{background:var(--purple);color:white;border-radius:8px;padding:5px 20px;font-size:13px;font-weight:800;margin:8px 0;letter-spacing:1px;}
     .mc-info-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:calc(100% - 24px);margin:8px 0;}
@@ -340,8 +344,8 @@
       <!-- Branch & Registration -->
       <div class="form-section-title">🏢 Branch & Registration</div>
       <div class="form-row">
-        <div class="form-group"><label>Branch*</label><select id="branch"><option>Pokuase Katapor Branch</option><option>Accra Central Branch</option><option>Kumasi Branch</option></select></div>
-        <div class="form-group"><label>Department</label><input type="text" id="occupation" placeholder="e.g. Finance"/></div>
+        <div class="form-group"><label>Branch station*</label><select id="branch"><option>Pokuase Katapor Branch</option><option>Accra Central Branch</option><option>Kumasi Branch</option></select></div>
+        <div class="form-group"><label>Department</label><select id="occupation"><option value="">— Select Department —</option><option>IT/Welfare</option><option>Management</option><option>Brother</option><option>Account</option><option>Media</option><option>Canteen</option><option>Sticker</option><option>Prayer Material/Sticker</option><option>Electrician</option><option>Sanitation</option><option>Instrumentalist</option><option>Driver</option><option>Security</option><option>Store</option><option>Accommodation Coordinator</option></select></div>
         <div class="form-group"><label>Registration Date</label><input type="date" id="dateCaptured"/></div>
       </div>
 
@@ -690,7 +694,7 @@
       branch: row.branch || '',
       group: row.grp || '',
       status: row.status || 'active',
-      verified: false,
+      verified: !!(row.first_name && row.last_name && row.phone && row.branch && row.occupation && row.date_captured && row.photo),
       benefit: row.benefit || 'No',
       capturedBy: row.captured_by || '',
       dateCaptured: row.date_captured || '',
@@ -748,10 +752,14 @@
       const hasDeceased = (m.father && m.father.deceased) || (m.mother && m.mother.deceased);
       const branch      = (m.branch||'').replace(' Branch','').replace(' Station','');
       const regDate     = m.dateCaptured ? m.dateCaptured.toString().slice(0,10) : '—';
+      const isVerified  = !!(m.name && m.phone && m.branch && m.occupation && m.dateCaptured && m.photo);
       return `
         <div class="member-card">
-          <div class="mc-photo-header"><div class="mc-photo">${m.photo?`<img src="${m.photo}" alt="${m.name}"/>`:`${initials}`}</div></div>
-          <div class="mc-crown">👑</div>
+          <div class="mc-photo-header">
+            <div class="mc-badge ${isVerified?'verified':'incomplete'}">${isVerified?'VERIFIED':'INCOMPLETE'}</div>
+            <div class="mc-photo">${m.photo?`<img src="${m.photo}" alt="${m.name}"/>`:`${initials}`}</div>
+          </div>
+          <div class="mc-crown"><img src="/crown.png" alt="Philadelphia Royal"/></div>
           <div class="mc-name">${m.name}</div>
           <div class="mc-id">${m.id}</div>
           <div class="mc-info-row">
