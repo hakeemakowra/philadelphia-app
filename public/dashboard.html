@@ -107,6 +107,13 @@
     .id-pill.amber{background:#fef3c7;color:var(--amber);border-color:#fbbf24;}
     .id-pill.pink{background:#fce7f3;color:#db2777;border-color:#f9a8d4;}
 
+    /* PROFILE PHOTO */
+    .profile-photo-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:28px;}
+    .profile-photo-circle{width:110px;height:110px;border-radius:50%;border:4px solid var(--teal);background:linear-gradient(135deg,var(--teal),var(--purple));display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;color:white;overflow:hidden;cursor:pointer;position:relative;box-shadow:0 4px 16px rgba(0,0,0,0.15);}
+    .profile-photo-circle img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+    .profile-photo-hint{font-size:12px;color:var(--muted);margin-top:10px;font-weight:600;}
+    .topbar-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+
     /* FORM CARD */
     .form-card{background:white;border-radius:16px;padding:32px;box-shadow:0 2px 12px rgba(0,0,0,0.06);max-width:960px;}
     .form-card h2{font-size:20px;font-weight:800;margin-bottom:24px;}
@@ -480,6 +487,13 @@
   <div id="panel-profile" class="panel">
     <div class="form-card">
       <h2>✏️ Update My Profile</h2>
+      <div class="profile-photo-wrap">
+        <div class="profile-photo-circle" id="profilePhotoCircle" onclick="document.getElementById('profilePhotoInput').click()">
+          <span id="profilePhotoInitials">?</span>
+        </div>
+        <div class="profile-photo-hint">Click photo to change</div>
+        <input type="file" id="profilePhotoInput" accept="image/*" style="display:none" onchange="handleProfilePhoto(event)"/>
+      </div>
       <div class="form-section-title">Account Information</div>
       <div class="form-row form-row-2">
         <div class="form-group"><label>Full Name</label><input type="text" id="profileName" placeholder="Your full name"/></div>
@@ -665,15 +679,44 @@
   let weddingMemberIdx= -1;
 
   // ── AUTH ──────────────────────────────────────────────────────────────────
+  function applyProfilePhoto(dataUrl, initials) {
+    const circle  = document.getElementById('profilePhotoCircle');
+    const avatar  = document.getElementById('topAvatar');
+    const initEl  = document.getElementById('profilePhotoInitials');
+    if (dataUrl) {
+      circle.innerHTML = `<img src="${dataUrl}" alt="profile"/>`;
+      avatar.innerHTML = `<img src="${dataUrl}" alt="profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>`;
+    } else {
+      initEl.textContent = initials;
+      avatar.textContent = initials;
+    }
+  }
+
+  function handleProfilePhoto(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const dataUrl = ev.target.result;
+      localStorage.setItem('profilePhoto', dataUrl);
+      applyProfilePhoto(dataUrl, '');
+      showToast('✅ Profile photo updated!');
+    };
+    reader.readAsDataURL(file);
+  }
+
   async function loadUser() {
     try {
       const res = await fetch('/api/me');
       if (!res.ok) { window.location.href='/login'; return; }
       const { user } = await res.json();
+      const initials = user.name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
       document.getElementById('topName').textContent = user.name;
-      document.getElementById('topAvatar').textContent = user.name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
       document.getElementById('profileName').value  = user.name;
       document.getElementById('profileEmail').value = user.email;
+      document.getElementById('profilePhotoInitials').textContent = initials;
+      const saved = localStorage.getItem('profilePhoto');
+      applyProfilePhoto(saved || null, initials);
     } catch { window.location.href='/login'; }
   }
   async function handleLogout() { await fetch('/api/logout',{method:'POST'}); window.location.href='/'; }
@@ -707,7 +750,9 @@
       document.getElementById('profilePassword').value = '';
       document.getElementById('profilePasswordConfirm').value = '';
       document.getElementById('topName').textContent = name;
-      document.getElementById('topAvatar').textContent = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+      const newInitials = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+      const saved = localStorage.getItem('profilePhoto');
+      applyProfilePhoto(saved || null, newInitials);
       showToast('✅ Profile updated successfully!');
     } catch (err) {
       showToast('❌ Failed to save profile.');
